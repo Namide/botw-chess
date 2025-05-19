@@ -58,7 +58,7 @@ export class ChessScene {
       const model = gltf.scene;
 
       for (const child of gltf.scene.children) {
-        if (child.isLight) {
+        if ((child as Light).isLight) {
           (child as Light).intensity = 100;
           child.parent?.remove(child);
         }

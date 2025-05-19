@@ -4,7 +4,7 @@ import { ChessScene } from './threeD/ChessScene';
 
 
 const canvas = ref<HTMLCanvasElement>()
-let chessScene: ChessScene
+// let chessScene: ChessScene
 
 watch(canvas, canvas => {
   if (canvas) {
@@ -13,7 +13,7 @@ watch(canvas, canvas => {
 })
 
 function init3D(canvas: HTMLCanvasElement) {
-  chessScene = new ChessScene({ canvas })
+  new ChessScene({ canvas })
 }
 
 </script>
