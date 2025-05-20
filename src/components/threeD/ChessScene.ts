@@ -1,20 +1,17 @@
 import {
-  ACESFilmicToneMapping,
-  Clock,
   EquirectangularReflectionMapping,
   Light,
+  Material,
   Mesh,
-  PerspectiveCamera,
-  Scene,
-  SRGBColorSpace,
+  NoColorSpace,
   TextureLoader,
-  WebGLRenderer,
 } from "three";
-import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import botwChessSrc from "../../assets/botw-chess-002.glb?url";
 import environmentMapSrc from "../../assets/bg-draft-stadium-001.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
+import { RenderScene } from "./RenderScene";
 
 const piecesNames = [
   "whiteKing",
@@ -51,12 +48,7 @@ const piecesNames = [
   "blackPawn8",
 ] as const;
 
-export class ChessScene {
-  scene;
-  camera;
-  renderer;
-  controls;
-  clock;
+export class ChessScene extends RenderScene {
   meshes?: {
     board: Mesh;
     whiteKing: Mesh;
@@ -93,37 +85,18 @@ export class ChessScene {
     blackPawn8: Mesh;
   };
   meshesPositions: { x: number; y: number; z: number }[][] = [];
-  tweens: Tween<any>[] = [];
 
   constructor({ canvas }: { canvas: HTMLCanvasElement }) {
-    this.render = this.render.bind(this);
-    this.onWindowResize = this.onWindowResize.bind(this);
-    this.tick = this.tick.bind(this);
-
-    this.clock = new Clock();
-
-    this.camera = new PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.25,
-      200
-    );
-    this.camera.position.set(7, 1, 12);
-    this.scene = new Scene();
-
-    this.renderer = new WebGLRenderer({ antialias: true, canvas });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1;
+    super({ canvas });
 
     new TextureLoader().load(environmentMapSrc, (texture) => {
       texture.mapping = EquirectangularReflectionMapping;
-      texture.colorSpace = SRGBColorSpace;
+      texture.colorSpace = NoColorSpace;
+      this.disposeList.push(() => texture.dispose());
 
       this.scene.background = texture;
       this.scene.environment = texture;
-      this.scene.environmentIntensity = 0.2;
+      this.scene.environmentIntensity = 0.8;
 
       this.render();
 
@@ -168,19 +141,17 @@ export class ChessScene {
 
       this.scene.add(model);
 
+      this.disposeList.push(() =>
+        model.children.forEach((child) => {
+          if ((child as Mesh).isMesh) {
+            (child as Mesh).geometry.dispose();
+            ((child as Mesh).material as Material).dispose();
+          }
+        })
+      );
+
       this.render();
     });
-
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    // this.controls.addEventListener("change", this.render); // use if there is no animation loop
-    this.controls.minDistance = 2;
-    this.controls.maxDistance = 100;
-    this.controls.target.set(0, 1, 0);
-    this.controls.update();
-
-    window.addEventListener("resize", this.onWindowResize);
-
-    this.renderer.setAnimationLoop(this.tick);
   }
 
   change(_id: number) {
@@ -245,21 +216,23 @@ export class ChessScene {
     shuffle(positions);
     for (const name of piecesNames) {
       const piece = this.meshes[name];
-      const rot = [
-        piece.rotation.x,
-        piece.rotation.y,
-        piece.rotation.z,
-      ] as const;
+      if (!piece.userData.rot) {
+        piece.userData.rot = [
+          piece.rotation.x,
+          piece.rotation.y,
+          piece.rotation.z,
+        ] as const;
+      }
       this.addTween(
-        new Tween([...piece.position.toArray(), ...rot], false)
+        new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
           .to(
             [
               piece.position.x,
               piece.position.y + 10,
               piece.position.z,
-              rot[0] + Math.PI * Math.random() - Math.PI / 2,
-              rot[1] + Math.PI * Math.random() - Math.PI / 2,
-              rot[2] + Math.PI * Math.random() - Math.PI / 2,
+              piece.userData.rot[0] + Math.PI * Math.random() - Math.PI / 2,
+              piece.userData.rot[1] + Math.PI * Math.random() - Math.PI / 2,
+              piece.userData.rot[2] + Math.PI * Math.random() - Math.PI / 2,
             ],
             DURATION / 4
           )
@@ -284,7 +257,7 @@ export class ChessScene {
                 ],
                 false
               )
-                .to([x, y, z, ...rot], DURATION / 4)
+                .to([x, y, z, ...piece.userData.rot], DURATION / 4)
                 .easing(Easing.Quadratic.Out)
                 .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
                   piece.position.set(x, y, z);
@@ -292,50 +265,12 @@ export class ChessScene {
                 })
             );
           } else {
-            piece.rotation.set(...rot);
+            piece.rotation.set(
+              ...(piece.userData.rot as [number, number, number])
+            );
           }
         }
       );
-
-      // tween.start();
-      // function animate(time) {
-      //   tween.update(time);
-      //   requestAnimationFrame(animate);
-      // }
-      // requestAnimationFrame(animate);
     }
-  }
-
-  addTween(tween: Tween<any>, onComplete?: () => void) {
-    this.tweens.push(tween);
-    tween.onComplete(() => {
-      const i = this.tweens.indexOf(tween);
-      this.tweens.splice(i, 0);
-
-      if (onComplete) {
-        onComplete();
-      }
-    });
-    return tween.start();
-  }
-
-  tick() {
-    for (let i = this.tweens.length - 1; i >= 0; i--) {
-      this.tweens[i].update();
-    }
-    this.render();
-  }
-
-  render() {
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-    this.render();
   }
 }

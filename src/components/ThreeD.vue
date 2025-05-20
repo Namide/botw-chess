@@ -10,6 +10,8 @@ let chessScene: ChessScene
 watch(canvas, canvas => {
   if (canvas) {
     init3D(canvas)
+  } else if (chessScene) {
+    chessScene.dispose()
   }
 })
 
