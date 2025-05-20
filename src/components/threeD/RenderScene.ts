@@ -20,7 +20,12 @@ import {
 } from "three/examples/jsm/Addons.js";
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import { BokehPass } from "./BokehPass";
+import GameStats from "gamestats.js";
 
+const stats = new GameStats({
+  // targetFPS: 60
+});
+document.body.appendChild(stats.dom);
 
 export class RenderScene {
   scene;
@@ -74,66 +79,10 @@ export class RenderScene {
     });
   }
 
-  // initBokeh() {
-  //   const rtTextureDepth = new WebGLRenderTarget(
-  //     window.innerWidth,
-  //     window.innerHeight,
-  //     { type: HalfFloatType }
-  //   );
-  //   const rtTextureColor = new WebGLRenderTarget(
-  //     window.innerWidth,
-  //     window.innerHeight,
-  //     { type: HalfFloatType }
-  //   );
-
-  //   const shader = BokehShader;
-  //   const uniforms = UniformsUtils.clone(shader.uniforms as any);
-  //   uniforms["tColor"].value = rtTextureColor.texture;
-  //   uniforms["tDepth"].value = rtTextureDepth.texture;
-  //   uniforms["textureWidth"].value = window.innerWidth;
-  //   uniforms["textureHeight"].value = window.innerHeight;
-
-  //   const materialBokeh = new ShaderMaterial({
-  //     uniforms: uniforms,
-  //     vertexShader: shader.vertexShader,
-  //     fragmentShader: shader.fragmentShader,
-  //     defines: {
-  //       RINGS: 1,
-  //       SAMPLES: 4,
-  //     },
-  //   });
-
-  //   const quad = new Mesh(
-  //     new PlaneGeometry(window.innerWidth, window.innerHeight),
-  //     materialBokeh
-  //   );
-  //   quad.position.z = -500;
-  //   this.scene.add(quad);
-
-  //   return {
-  //     rtTextureDepth,
-  //     rtTextureColor,
-  //   };
-  // }
-
   initPostProcess() {
     const renderScene = new RenderPass(this.scene, this.camera);
     this.disposeList.push(() => renderScene.dispose());
-    // composerScene.addPass(renderBackground);
-    // composerScene.addPass(renderScene);
-    // composerScene.addPass(renderMaskInverse);
-    // composerScene.addPass(effectHBlur);
-    // composerScene.addPass(effectVBlur);
-    // composerScene.addPass(clearMask);
-
-    // const renderScene = new TexturePass(composerScene.renderTarget2.texture);
-
-    // const shaderBleach = BleachBypassShader;
-    // const shaderSepia = SepiaShader;
     const shaderVignette = VignetteShader;
-
-    // const effectBleach = new ShaderPass(shaderBleach);
-    // const effectSepia = new ShaderPass(shaderSepia);
 
     const effectVignette = new ShaderPass(shaderVignette);
     effectVignette.uniforms["offset"].value = 1.2;
@@ -142,10 +91,6 @@ export class RenderScene {
 
     const gammaCorrection = new ShaderPass(GammaCorrectionShader);
     this.disposeList.push(() => gammaCorrection.dispose());
-
-    // effectBleach.uniforms["opacity"].value = 0.95;
-
-    // effectSepia.uniforms["amount"].value = 0.9;
 
     const bloomPass = new UnrealBloomPass(
       new Vector2(window.innerWidth, window.innerHeight),
@@ -158,7 +103,7 @@ export class RenderScene {
     bloomPass.radius = 0;
     this.disposeList.push(() => bloomPass.dispose());
 
-    const bokehPass = new BokehPass({ scene: this.scene, camera: this.camera })
+    const bokehPass = new BokehPass({ scene: this.scene, camera: this.camera });
     this.disposeList.push(() => bokehPass.dispose());
 
     const effectFilm = new FilmPass(0.35);
@@ -166,16 +111,6 @@ export class RenderScene {
 
     // const effectFilmBW = new FilmPass(0.35, true);
     // const effectDotScreen = new DotScreenPass(new Vector2(0, 0), 0.5, 0.8);
-
-    const smaaPass = new SMAAPass();
-    this.disposeList.push(() => smaaPass.dispose());
-
-    // const bokehPass = new BokehPass(this.scene, this.camera, {
-    //   focus: 10,
-    //   aperture: 0.001,
-    //   maxblur: 0.02,
-    // });
-    // this.disposeList.push(() => bokehPass.dispose());
 
     const ssrPass = new SSRPass({
       renderer: this.renderer,
@@ -191,7 +126,7 @@ export class RenderScene {
     this.disposeList.push(() => ssrPass.dispose());
 
     const composer = new EffectComposer(
-      this.renderer,
+      this.renderer
       // new WebGLRenderTarget(window.innerWidth, window.innerHeight, {
       //   stencilBuffer: true,
       //   // samples: this.renderer.getPixelRatio() === 1 ? 8 : 0
@@ -199,13 +134,21 @@ export class RenderScene {
     );
     this.disposeList.push(() => composer.dispose());
 
-    // composer.addPass(renderScene);
-    composer.addPass(ssrPass);
-    composer.addPass(smaaPass);
+    if (ssrPass) {
+      composer.addPass(ssrPass);
+    } else {
+      composer.addPass(renderScene);
+    }
+
+    if (this.renderer.getPixelRatio() <= 1) {
+      const smaaPass = new SMAAPass();
+      this.disposeList.push(() => smaaPass.dispose());
+      composer.addPass(smaaPass);
+    }
+
     composer.addPass(bokehPass);
     composer.addPass(bloomPass);
     composer.addPass(effectFilm);
-    // composer.addPass(clearMask);
     composer.addPass(effectVignette);
 
     // Hardware MSAA
@@ -231,10 +174,14 @@ export class RenderScene {
   }
 
   tick() {
+    stats.begin();
     for (let i = this.tweens.length - 1; i >= 0; i--) {
       this.tweens[i].update();
     }
+
     this.render();
+
+    stats.end();
   }
 
   render() {
