@@ -6,8 +6,8 @@ import {
   NoColorSpace,
   TextureLoader,
 } from "three";
-import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import botwChessSrc from "../../assets/botw-chess-002.glb?url";
+import { GLTFLoader, GroundedSkybox } from "three/examples/jsm/Addons.js";
+import botwChessSrc from "../../assets/botw-chess-005.glb?url";
 import environmentMapSrc from "../../assets/bg-draft-stadium-001.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
@@ -94,9 +94,12 @@ export class ChessScene extends RenderScene {
       texture.colorSpace = NoColorSpace;
       this.disposeList.push(() => texture.dispose());
 
-      this.scene.background = texture;
       this.scene.environment = texture;
       this.scene.environmentIntensity = 0.8;
+      
+      const skybox = new GroundedSkybox(texture, 22, 150)
+      skybox.position.y = 0
+      this.scene.add(skybox);
 
       this.render();
 
