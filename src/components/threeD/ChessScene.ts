@@ -247,6 +247,7 @@ export class ChessScene extends RenderScene {
           }),
         () => {
           if (Math.random() < 0.25) {
+            piece.visible = true
             const { x, y, z } = positions.shift()!;
             piece.position.x = x;
             piece.position.z = z;
@@ -260,7 +261,7 @@ export class ChessScene extends RenderScene {
                 ],
                 false
               )
-                .to([x, y, z, ...piece.userData.rot], DURATION / 4)
+                .to([x, y, z, ...piece.userData.rot], DURATION / 3)
                 .easing(Easing.Quadratic.Out)
                 .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
                   piece.position.set(x, y, z);
@@ -271,6 +272,7 @@ export class ChessScene extends RenderScene {
             piece.rotation.set(
               ...(piece.userData.rot as [number, number, number])
             );
+            piece.visible = false
           }
         }
       );

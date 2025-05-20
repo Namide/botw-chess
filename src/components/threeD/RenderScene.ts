@@ -5,7 +5,6 @@ import {
   Scene,
   Vector2,
   WebGLRenderer,
-  WebGLRenderTarget,
 } from "three";
 import {
   EffectComposer,
@@ -20,6 +19,8 @@ import {
   VignetteShader,
 } from "three/examples/jsm/Addons.js";
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
+import { BokehPass } from "./BokehPass";
+
 
 export class RenderScene {
   scene;
@@ -73,6 +74,48 @@ export class RenderScene {
     });
   }
 
+  // initBokeh() {
+  //   const rtTextureDepth = new WebGLRenderTarget(
+  //     window.innerWidth,
+  //     window.innerHeight,
+  //     { type: HalfFloatType }
+  //   );
+  //   const rtTextureColor = new WebGLRenderTarget(
+  //     window.innerWidth,
+  //     window.innerHeight,
+  //     { type: HalfFloatType }
+  //   );
+
+  //   const shader = BokehShader;
+  //   const uniforms = UniformsUtils.clone(shader.uniforms as any);
+  //   uniforms["tColor"].value = rtTextureColor.texture;
+  //   uniforms["tDepth"].value = rtTextureDepth.texture;
+  //   uniforms["textureWidth"].value = window.innerWidth;
+  //   uniforms["textureHeight"].value = window.innerHeight;
+
+  //   const materialBokeh = new ShaderMaterial({
+  //     uniforms: uniforms,
+  //     vertexShader: shader.vertexShader,
+  //     fragmentShader: shader.fragmentShader,
+  //     defines: {
+  //       RINGS: 1,
+  //       SAMPLES: 4,
+  //     },
+  //   });
+
+  //   const quad = new Mesh(
+  //     new PlaneGeometry(window.innerWidth, window.innerHeight),
+  //     materialBokeh
+  //   );
+  //   quad.position.z = -500;
+  //   this.scene.add(quad);
+
+  //   return {
+  //     rtTextureDepth,
+  //     rtTextureColor,
+  //   };
+  // }
+
   initPostProcess() {
     const renderScene = new RenderPass(this.scene, this.camera);
     this.disposeList.push(() => renderScene.dispose());
@@ -115,6 +158,9 @@ export class RenderScene {
     bloomPass.radius = 0;
     this.disposeList.push(() => bloomPass.dispose());
 
+    const bokehPass = new BokehPass({ scene: this.scene, camera: this.camera })
+    this.disposeList.push(() => bokehPass.dispose());
+
     const effectFilm = new FilmPass(0.35);
     this.disposeList.push(() => effectFilm.dispose());
 
@@ -124,23 +170,12 @@ export class RenderScene {
     const smaaPass = new SMAAPass();
     this.disposeList.push(() => smaaPass.dispose());
 
-    // const effectHBlur = new ShaderPass(HorizontalBlurShader);
-    // const effectVBlur = new ShaderPass(VerticalBlurShader);
-    // effectHBlur.uniforms["h"].value = 2 / (width / 2);
-    // effectVBlur.uniforms["v"].value = 2 / (height / 2);
-
-    // const geometry = new PlaneGeometry(1, 1);
-    // const groundReflector = new ReflectorForSSRPass(geometry, {
-    //   clipBias: 0.0003,
-    //   textureWidth: window.innerWidth,
-    //   textureHeight: window.innerHeight,
-    //   color: 0x888888,
-    //   useDepthTexture: true,
+    // const bokehPass = new BokehPass(this.scene, this.camera, {
+    //   focus: 10,
+    //   aperture: 0.001,
+    //   maxblur: 0.02,
     // });
-    // groundReflector.material.depthWrite = false;
-    // groundReflector.rotation.x = -Math.PI / 2;
-    // groundReflector.visible = false;
-    // this.scene.add(groundReflector);
+    // this.disposeList.push(() => bokehPass.dispose());
 
     const ssrPass = new SSRPass({
       renderer: this.renderer,
@@ -157,24 +192,19 @@ export class RenderScene {
 
     const composer = new EffectComposer(
       this.renderer,
-      new WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-        stencilBuffer: true,
-        // samples: this.renderer.getPixelRatio() === 1 ? 8 : 0
-      })
+      // new WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+      //   stencilBuffer: true,
+      //   // samples: this.renderer.getPixelRatio() === 1 ? 8 : 0
+      // })
     );
     this.disposeList.push(() => composer.dispose());
-    composer.addPass(renderScene);
-    composer.addPass(bloomPass);
+
+    // composer.addPass(renderScene);
     composer.addPass(ssrPass);
     composer.addPass(smaaPass);
-    // composer.addPass(gammaCorrection);
+    composer.addPass(bokehPass);
+    composer.addPass(bloomPass);
     composer.addPass(effectFilm);
-    // composer.addPass(effectDotScreen);
-    // composer.addPass(renderMask);
-    // composer.addPass(effectColorify1);
-    // composer.addPass(clearMask);
-    // composer.addPass(renderMaskInverse);
-    // composer.addPass(effectColorify2);
     // composer.addPass(clearMask);
     composer.addPass(effectVignette);
 
