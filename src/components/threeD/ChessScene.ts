@@ -86,8 +86,8 @@ export class ChessScene extends RenderScene {
   };
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
-  constructor({ canvas }: { canvas: HTMLCanvasElement }) {
-    super({ canvas });
+  constructor({ canvas, hq }: { canvas: HTMLCanvasElement; hq: boolean }) {
+    super({ canvas, hq });
 
     new TextureLoader().load(environmentMapSrc, (texture) => {
       texture.mapping = EquirectangularReflectionMapping;
@@ -96,9 +96,9 @@ export class ChessScene extends RenderScene {
 
       this.scene.environment = texture;
       this.scene.environmentIntensity = 0.8;
-      
-      const skybox = new GroundedSkybox(texture, 22, 150)
-      skybox.position.y = 0
+
+      const skybox = new GroundedSkybox(texture, 22, 150);
+      skybox.position.y = 0;
       this.scene.add(skybox);
 
       this.render();
@@ -247,7 +247,7 @@ export class ChessScene extends RenderScene {
           }),
         () => {
           if (Math.random() < 0.25) {
-            piece.visible = true
+            piece.visible = true;
             const { x, y, z } = positions.shift()!;
             piece.position.x = x;
             piece.position.z = z;
@@ -272,7 +272,7 @@ export class ChessScene extends RenderScene {
             piece.rotation.set(
               ...(piece.userData.rot as [number, number, number])
             );
-            piece.visible = false
+            piece.visible = false;
           }
         }
       );

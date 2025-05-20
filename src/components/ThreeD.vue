@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { ChessScene } from './threeD/ChessScene';
+import { getGPUTier } from 'detect-gpu';
 
 const props = defineProps<{ sceneId: number }>()
 
@@ -21,8 +22,11 @@ watch(() => props.sceneId, (sceneId) => {
   }
 })
 
-function init3D(canvas: HTMLCanvasElement) {
-  chessScene = new ChessScene({ canvas })
+async function init3D(canvas: HTMLCanvasElement) {
+  // Get GPU performances
+  const gpuTier = await getGPUTier();
+  const hq = gpuTier.tier > 2;
+  chessScene = new ChessScene({ canvas, hq })
 }
 
 </script>

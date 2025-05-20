@@ -1,21 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { ChessScene } from './threeD/ChessScene';
-
-
-const canvas = ref<HTMLCanvasElement>()
-// let chessScene: ChessScene
-
-watch(canvas, canvas => {
-  if (canvas) {
-    init3D(canvas)
-  }
-})
-
-function init3D(canvas: HTMLCanvasElement) {
-  new ChessScene({ canvas })
-}
-
 </script>
 
 <template>

@@ -37,11 +37,14 @@ export class RenderScene {
   tweens: Tween<any>[] = [];
   disposeList: (() => void)[] = [];
 
-  constructor({ canvas }: { canvas: HTMLCanvasElement }) {
+  hq;
+
+  constructor({ canvas, hq }: { canvas: HTMLCanvasElement; hq: boolean }) {
     this.render = this.render.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.tick = this.tick.bind(this);
 
+    this.hq = hq;
     this.clock = new Clock();
 
     this.camera = new PerspectiveCamera(
@@ -53,8 +56,14 @@ export class RenderScene {
     this.camera.position.set(7, 1, 12);
     this.scene = new Scene();
 
-    this.renderer = new WebGLRenderer({ antialias: true, canvas });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer = new WebGLRenderer({
+      antialias: false,
+      canvas,
+      powerPreference: hq ? "default" : "high-performance",
+    });
+    this.renderer.setPixelRatio(
+      hq ? window.devicePixelRatio : Math.min(window.devicePixelRatio, 2)
+    );
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1;
@@ -80,8 +89,6 @@ export class RenderScene {
   }
 
   initPostProcess() {
-    const renderScene = new RenderPass(this.scene, this.camera);
-    this.disposeList.push(() => renderScene.dispose());
     const shaderVignette = VignetteShader;
 
     const effectVignette = new ShaderPass(shaderVignette);
@@ -112,19 +119,6 @@ export class RenderScene {
     // const effectFilmBW = new FilmPass(0.35, true);
     // const effectDotScreen = new DotScreenPass(new Vector2(0, 0), 0.5, 0.8);
 
-    const ssrPass = new SSRPass({
-      renderer: this.renderer,
-      scene: this.scene,
-      camera: this.camera,
-      width: innerWidth,
-      height: innerHeight,
-      groundReflector: null,
-      selects: null,
-    });
-    ssrPass.distanceAttenuation = true;
-    ssrPass.maxDistance = 2;
-    this.disposeList.push(() => ssrPass.dispose());
-
     const composer = new EffectComposer(
       this.renderer
       // new WebGLRenderTarget(window.innerWidth, window.innerHeight, {
@@ -134,13 +128,27 @@ export class RenderScene {
     );
     this.disposeList.push(() => composer.dispose());
 
-    if (ssrPass) {
+    if (this.hq) {
+      const ssrPass = new SSRPass({
+        renderer: this.renderer,
+        scene: this.scene,
+        camera: this.camera,
+        width: innerWidth,
+        height: innerHeight,
+        groundReflector: null,
+        selects: null,
+      });
+      ssrPass.distanceAttenuation = true;
+      ssrPass.maxDistance = 2;
+      this.disposeList.push(() => ssrPass.dispose());
       composer.addPass(ssrPass);
     } else {
+      const renderScene = new RenderPass(this.scene, this.camera);
+      this.disposeList.push(() => renderScene.dispose());
       composer.addPass(renderScene);
     }
 
-    if (this.renderer.getPixelRatio() <= 1) {
+    if (this.renderer.getPixelRatio() <= 1 && this.hq) {
       const smaaPass = new SMAAPass();
       this.disposeList.push(() => smaaPass.dispose());
       composer.addPass(smaaPass);
