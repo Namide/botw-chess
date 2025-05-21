@@ -292,7 +292,7 @@ export class ChessScene extends RenderScene {
     );
   }
 
-  random(_id: number) {
+  random() {
     if (!this.meshes) {
       return;
     }
