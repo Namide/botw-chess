@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import { ChessScene } from './threeD/ChessScene';
 import { getGPUTier } from 'detect-gpu';
 
-const props = defineProps<{ sceneId1: string, sceneId2: number }>()
+const props = defineProps<{ position?: string, random: number }>()
 
 const canvas = ref<HTMLCanvasElement>()
 let chessScene: ChessScene
@@ -16,15 +16,15 @@ watch(canvas, canvas => {
   }
 })
 
-watch(() => props.sceneId1, () => {
+watch(() => props.position, (position?: string) => {
   if (chessScene) {
-    chessScene.random()
+    chessScene.reset(position)
   }
 })
 
-watch(() => props.sceneId2, () => {
+watch(() => props.random, () => {
   if (chessScene) {
-    chessScene.reset()
+    chessScene.random()
   }
 })
 

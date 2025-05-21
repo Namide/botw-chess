@@ -177,9 +177,8 @@ export class ChessScene extends RenderScene {
     );
   }
 
-  reset(
-    positions: string = "4r1k1/p1p2pp1/1q1p3p/1P3P2/1P6/2n1Q3/PB4PP/4R1K1 w - - 0 1"
-  ) {
+  reset(positions: string) {
+    console.log("RESET", positions);
     const positionnedPieces: {
       // name: PieceName;
       position: { x: number; y: number; z: number };

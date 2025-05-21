@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import HomeView from './components/HomeView.vue';
 import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';
 import JoinView from './components/JoinView.vue';
 import CreditsView from './components/CreditsView.vue';
 
-const sceneId1 = ref(1)
-const sceneId2 = ref(1)
+const position = ref<string | undefined>(undefined)
+const random = ref(1)
 
 const page = ref('home')
 
-const scene1 = computed(() => page.value + sceneId1.value)
+watch(page, page => {
+  if (page !== 'news') {
+    random.value++
+  }
+})
 </script>
 
 <template>
-  <ThreeD :scene-id-1="scene1" :scene-id-2="sceneId2"></ThreeD>
+  <ThreeD :position="position" :random="random"></ThreeD>
   <main>
 
     <header>
@@ -24,15 +28,15 @@ const scene1 = computed(() => page.value + sceneId1.value)
     </header>
 
     <Transition name="page" mode="out-in">
-      <NewsView v-if="page === 'news'" @goto="page = $event" @change="sceneId1++" @reset="sceneId2++"></NewsView>
-      <JoinView v-else-if="page === 'join'" @goto="page = $event" @change="sceneId1++" @reset="sceneId2++"></JoinView>
-      <CreditsView v-else-if="page === 'credits'" @goto="page = $event" @change="sceneId1++" @reset="sceneId2++">
+      <NewsView v-if="page === 'news'" @goto="page = $event" @reset="position = $event"></NewsView>
+      <JoinView v-else-if="page === 'join'" @goto="page = $event" @change="random++" @reset="random++"></JoinView>
+      <CreditsView v-else-if="page === 'credits'" @goto="page = $event" @change="random++" @reset="random++">
       </CreditsView>
       <HomeView v-else @goto="page = $event"></HomeView>
     </Transition>
 
     <footer>
-      crédits Super8Studio & Namide
+      crédits ~ <a href="https://super8studio.eu/" target="_blank">Super8Studio</a> & <a href="https://damien-doussaud.com/" target="_blank">Namide</a>
     </footer>
 
   </main>
