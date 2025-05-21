@@ -12,6 +12,8 @@ import environmentMapSrc from "../../assets/bg-draft-stadium-001.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
 import { RenderScene } from "./RenderScene";
+import { lerp } from "three/src/math/MathUtils.js";
+import { DEBUG, START_CAMERA, START_POSITIONS } from "../../conf";
 
 const CLEAR_BOARD_DURATION = 2000;
 
@@ -55,89 +57,170 @@ export class ChessScene extends RenderScene {
   meshes?: Record<"table" | "board" | PieceName, Mesh>;
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
-  constructor({ canvas, hq }: { canvas: HTMLCanvasElement; hq: boolean }) {
-    super({ canvas, hq });
+  constructor({ canvas, hq, onReady }: { canvas: HTMLCanvasElement; hq: boolean, onReady: () => void }) {
+    super({ canvas, hq, onReady });
 
-    new TextureLoader().load(environmentMapSrc, (texture) => {
-      texture.mapping = EquirectangularReflectionMapping;
-      texture.colorSpace = NoColorSpace;
-      this.disposeList.push(() => texture.dispose());
+    // DEBUG
+    if (DEBUG) {
+      let to: number;
+      this.controls.addEventListener("change", () => {
+        clearTimeout(to);
+        to = setTimeout(() => {
+          console.log(
+            JSON.stringify(
+              {
+                cameraPosition: {
+                  x: this.camera.position.x,
+                  y: this.camera.position.y,
+                  z: this.camera.position.z,
+                },
+                targetPosition: {
+                  x: this.controls.target.x,
+                  y: this.controls.target.y,
+                  z: this.controls.target.z,
+                },
+                focalDepth: this.bokehPass.focalDepth,
+              },
+              undefined,
+              2
+            )
+          );
+        }, 500);
+      });
+    }
 
-      this.scene.environment = texture;
-      this.scene.environmentIntensity = 0.8;
-
-      const skybox = new GroundedSkybox(texture, 22, 150);
-      skybox.position.y = 0;
-      this.scene.add(skybox);
-
-      this.render();
-
-      // model
+    Promise.all([this.loadBackground(), this.loadModel()]).then(() => {
+      this.start();
     });
 
+    // Model
+  }
+
+  async loadModel() {
     const loader = new GLTFLoader();
-    loader.load(botwChessSrc, async (gltf) => {
-      const model = gltf.scene;
 
-      const meshes = {};
-      for (const child of gltf.scene.children) {
-        if ((child as Light).isLight) {
-          (child as Light).intensity = 100;
-          child.parent?.remove(child);
-        } else {
-          console.log("add:", child.name);
-          (meshes as any)[child.name] = child;
-        }
-      }
+    return new Promise((resolve) => {
+      loader.load(botwChessSrc, async (gltf) => {
+        const model = gltf.scene;
 
-      this.meshes = meshes as typeof this.meshes;
-      for (let i = 0; i < 8; i++) {
-        this.meshesPositions[i] = [];
-        for (let j = 0; j < 8; j++) {
-          this.meshesPositions[i][j] = {
-            x:
-              (this.meshes!.R2.position.x - this.meshes!.r1.position.x) *
-                (i / 7) +
-              this.meshes!.r1.position.x,
-            y: (this.meshes!.R2.position.y + this.meshes!.r1.position.y) / 2,
-            z:
-              (this.meshes!.R2.position.z - this.meshes!.r1.position.z) *
-                (j / 7) +
-              this.meshes!.r1.position.z,
-          };
-        }
-      }
-
-      // wait until the model can be added to the scene without blocking due to shader compilation
-      await this.renderer.compileAsync(model, this.camera, this.scene);
-
-      this.scene.add(model);
-
-      this.disposeList.push(() =>
-        model.children.forEach((child) => {
-          if ((child as Mesh).isMesh) {
-            (child as Mesh).geometry.dispose();
-            ((child as Mesh).material as Material).dispose();
+        const meshes = {};
+        for (const child of gltf.scene.children) {
+          if ((child as Light).isLight) {
+            (child as Light).intensity = 100;
+            child.parent?.remove(child);
+          } else {
+            (meshes as any)[child.name] = child;
           }
-        })
-      );
+        }
 
-      this.render();
+        this.meshes = meshes as typeof this.meshes;
+        for (let i = 0; i < 8; i++) {
+          this.meshesPositions[i] = [];
+          for (let j = 0; j < 8; j++) {
+            this.meshesPositions[i][j] = {
+              x:
+                (this.meshes!.R2.position.x - this.meshes!.r1.position.x) *
+                  (i / 7) +
+                this.meshes!.r1.position.x,
+              y: (this.meshes!.R2.position.y + this.meshes!.r1.position.y) / 2,
+              z:
+                (this.meshes!.R2.position.z - this.meshes!.r1.position.z) *
+                  (j / 7) +
+                this.meshes!.r1.position.z,
+            };
+          }
+        }
+
+        // wait until the model can be added to the scene without blocking due to shader compilation
+        await this.renderer.compileAsync(model, this.camera, this.scene);
+
+        this.scene.add(model);
+
+        this.disposeList.push(() =>
+          model.children.forEach((child) => {
+            if ((child as Mesh).isMesh) {
+              (child as Mesh).geometry.dispose();
+              ((child as Mesh).material as Material).dispose();
+            }
+          })
+        );
+
+        this.moveCamera(START_CAMERA, 0);
+        this.reset(START_POSITIONS, 0);
+
+        // this.render();
+        resolve(true);
+      });
     });
   }
 
-  moveCamera() {
+  async loadBackground() {
+    return new Promise((resolve) => {
+      new TextureLoader().load(environmentMapSrc, (texture) => {
+        texture.mapping = EquirectangularReflectionMapping;
+        texture.colorSpace = NoColorSpace;
+        this.disposeList.push(() => texture.dispose());
+
+        this.scene.environment = texture;
+        this.scene.environmentIntensity = 0.8;
+
+        const skybox = new GroundedSkybox(texture, 22, 150);
+        skybox.position.y = 0;
+        this.scene.add(skybox);
+
+        resolve(true);
+        // this.render();
+      });
+    });
+  }
+
+  moveCamera(
+    {
+      cameraPosition = {
+        x: lerp(
+          this.meshes!.R2.position.x,
+          this.meshes!.r1.position.x,
+          Math.random()
+        ),
+        y: lerp(0.5, 1.5, Math.random()),
+        z: lerp(
+          this.meshes!.R2.position.z,
+          this.meshes!.r1.position.z,
+          Math.random()
+        ),
+      },
+      targetPosition = {
+        x: lerp(
+          this.meshes!.R2.position.x,
+          this.meshes!.r1.position.x,
+          Math.random()
+        ),
+        y: 1,
+        z: lerp(
+          this.meshes!.R2.position.z,
+          this.meshes!.r1.position.z,
+          Math.random()
+        ),
+      },
+      focalDepth = 50,
+    }: {
+      cameraPosition?: { x: number; y: number; z: number };
+      targetPosition?: { x: number; y: number; z: number };
+      focalDepth?: number;
+    } = {},
+    duration = CLEAR_BOARD_DURATION
+  ) {
     this.controls.enabled = false;
+
     const startRads = Math.atan2(
-      this.camera.position.z,
-      this.camera.position.x
+      this.camera.position.z - this.controls.target.z,
+      this.camera.position.x - this.controls.target.x
     );
-
     const startDist = Math.sqrt(
-      this.camera.position.z ** 2 + this.camera.position.x ** 2
+      (this.camera.position.z - this.controls.target.z) ** 2 +
+        (this.camera.position.x - this.controls.target.x) ** 2
     );
 
-    const CENTER_VIEW_DIST = 5;
     this.addTween(
       new Tween(
         [
@@ -145,41 +228,53 @@ export class ChessScene extends RenderScene {
           startDist,
           this.camera.position.y,
           ...this.controls.target.toArray(),
+          this.bokehPass.focalDepth,
         ],
         false
       )
-        .duration(CLEAR_BOARD_DURATION)
+        .duration(duration)
         .easing(Easing.Exponential.InOut)
         .to(
           (() => {
-            const dist = Math.random() * 6 + 3;
-            const rads = startRads + Math.random() * Math.PI * 2 - Math.PI;
+            const rads = Math.atan2(
+              cameraPosition.z - targetPosition.z,
+              cameraPosition.x - targetPosition.x
+            );
+
+            const dist = Math.sqrt(
+              (cameraPosition.z - targetPosition.z) ** 2 +
+                (cameraPosition.x - targetPosition.x) ** 2
+            );
+
             return [
               rads,
               dist,
-              Math.random() + 0.5,
-              Math.random() * CENTER_VIEW_DIST - CENTER_VIEW_DIST / 2,
-              1,
-              Math.random() * CENTER_VIEW_DIST - CENTER_VIEW_DIST / 2,
+              cameraPosition.y,
+              targetPosition.x,
+              targetPosition.y,
+              targetPosition.z,
+              focalDepth,
             ];
           })()
         )
-        .onUpdate(([rads, dist, elevation, targetX, targetY, targetZ]) => {
-          this.camera.position.set(
-            Math.cos(rads) * dist,
-            elevation,
-            Math.sin(rads) * dist
-          );
-          this.controls.target.set(targetX, targetY, targetZ);
-          this.controls.update();
-        }),
+        .onUpdate(
+          ([rads, dist, elevation, targetX, targetY, targetZ, focalDepth]) => {
+            this.camera.position.set(
+              Math.cos(rads) * dist + this.controls.target.x,
+              elevation,
+              Math.sin(rads) * dist + this.controls.target.z
+            );
+            this.controls.target.set(targetX, targetY, targetZ);
+            this.controls.update();
+            this.bokehPass.focalDepth = focalDepth;
+          }
+        ),
       () => (this.controls.enabled = true)
     );
   }
 
-  reset(positions: string) {
+  reset(positions: string, duration = CLEAR_BOARD_DURATION) {
     const positionnedPieces: {
-      // name: PieceName;
       position: { x: number; y: number; z: number };
       mesh: Mesh;
     }[] = [];
@@ -208,17 +303,21 @@ export class ChessScene extends RenderScene {
       }
     }
 
-    this.moveCamera();
     piecesNames.forEach((pieceName) => {
       const mesh = this.meshes![pieceName];
       this.movePiece(
         mesh,
-        positionnedPieces.find((pp) => pp.mesh.name === pieceName)?.position
+        positionnedPieces.find((pp) => pp.mesh.name === pieceName)?.position,
+        duration
       );
     });
   }
 
-  movePiece(piece: Mesh, position?: { x: number; y: number; z: number }) {
+  movePiece(
+    piece: Mesh,
+    position?: { x: number; y: number; z: number },
+    duration = CLEAR_BOARD_DURATION
+  ) {
     const GAP = 0.5;
 
     // Save initial rotation
@@ -241,9 +340,9 @@ export class ChessScene extends RenderScene {
             piece.userData.rot[1] + Math.PI * Math.random() - Math.PI / 2,
             piece.userData.rot[2] + Math.PI * Math.random() - Math.PI / 2,
           ],
-          CLEAR_BOARD_DURATION / 4
+          duration / 4
         )
-        .delay((Math.random() * CLEAR_BOARD_DURATION) / 4)
+        .delay((Math.random() * duration) / 4)
         .easing(Easing.Exponential.In)
         .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
           piece.position.set(x, y, z);
@@ -272,7 +371,7 @@ export class ChessScene extends RenderScene {
                   z + GAP * Math.random() - GAP / 2,
                   ...piece.userData.rot,
                 ],
-                CLEAR_BOARD_DURATION / 3
+                duration / 3
               )
               .easing(Easing.Quadratic.Out)
               .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
@@ -294,8 +393,6 @@ export class ChessScene extends RenderScene {
     if (!this.meshes) {
       return;
     }
-
-    this.moveCamera();
 
     const positions = this.meshesPositions.flat(2);
     shuffle(positions);

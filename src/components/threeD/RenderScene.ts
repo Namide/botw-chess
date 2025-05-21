@@ -21,6 +21,7 @@ import {
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import { BokehPass } from "./BokehPass";
 import GameStats from "gamestats.js";
+import { START_CAMERA } from "../../conf";
 
 const stats = new GameStats({
   // targetFPS: 60
@@ -36,14 +37,25 @@ export class RenderScene {
   composer;
   tweens: Tween<any>[] = [];
   disposeList: (() => void)[] = [];
+  bokehPass: BokehPass;
+  onReady;
 
   hq;
 
-  constructor({ canvas, hq }: { canvas: HTMLCanvasElement; hq: boolean }) {
+  constructor({
+    canvas,
+    hq,
+    onReady,
+  }: {
+    canvas: HTMLCanvasElement;
+    hq: boolean;
+    onReady: () => void;
+  }) {
     this.render = this.render.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.tick = this.tick.bind(this);
 
+    this.onReady = onReady;
     this.hq = hq;
     this.clock = new Clock();
 
@@ -53,7 +65,11 @@ export class RenderScene {
       0.25,
       200
     );
-    this.camera.position.set(7, 1, 12);
+    this.camera.position.set(
+      START_CAMERA.cameraPosition.x,
+      START_CAMERA.cameraPosition.y,
+      START_CAMERA.cameraPosition.z
+    );
     this.scene = new Scene();
 
     this.renderer = new WebGLRenderer({
@@ -72,20 +88,30 @@ export class RenderScene {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.minDistance = 2;
     this.controls.maxDistance = 100;
-    this.controls.target.set(0, 1, 0);
+    this.controls.target.set(
+      START_CAMERA.targetPosition.x,
+      START_CAMERA.targetPosition.y,
+      START_CAMERA.targetPosition.z
+    );
     this.controls.update();
     this.disposeList.push(() => this.controls.dispose());
 
-    const { composer } = this.initPostProcess();
+    const { composer, bokehPass } = this.initPostProcess();
     this.composer = composer;
+    this.bokehPass = bokehPass;
+    this.bokehPass.focalDepth = START_CAMERA.focalDepth;
 
     window.addEventListener("resize", this.onWindowResize);
-
-    this.renderer.setAnimationLoop(this.tick);
 
     this.disposeList.push(() => {
       this.tweens = [];
     });
+  }
+
+  start() {
+    this.tick();
+    this.onReady();
+    this.renderer.setAnimationLoop(this.tick);
   }
 
   initPostProcess() {
@@ -165,7 +191,7 @@ export class RenderScene {
     //   composer.renderTarget2.samples = 8;
     // }
 
-    return { composer };
+    return { composer, bokehPass };
   }
 
   addTween(tween: Tween<any>, onComplete?: () => void) {

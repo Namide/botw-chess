@@ -4,22 +4,43 @@ import HomeView from './components/HomeView.vue';
 import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';
 import JoinView from './components/JoinView.vue';
-import CreditsView from './components/CreditsView.vue';
+import { START_CAMERA, START_POSITIONS } from './conf';
 
 const position = ref<string | undefined>(undefined)
 const random = ref(1)
+const camera = ref('')
 
-const page = ref('home')
+const page = ref<'home' | 'news' | 'join'>('home')
 
 watch(page, page => {
-  if (page !== 'news') {
-    random.value++
+  switch (page) {
+    case 'home':
+      position.value = START_POSITIONS
+      camera.value = JSON.stringify(START_CAMERA)
+      break
+    case 'join':
+      position.value = ''
+      camera.value = ''
+      // camera.value = JSON.stringify({
+      //   cameraPosition: {
+      //     x: Math.random() * 20 - 10,
+      //     y: 1.5,
+      //     z: Math.random() * 20 - 10,
+      //   },
+      //   targetPosition: {
+      //     x: 0,
+      //     y: 1,
+      //     z: 0,
+      //   },
+      //   focalDepth: 50,
+      // })
+      break
   }
 })
 </script>
 
 <template>
-  <ThreeD :position="position" :random="random"></ThreeD>
+  <ThreeD :position="position" :camera="camera" :random="random"></ThreeD>
   <main>
 
     <header>
@@ -28,15 +49,15 @@ watch(page, page => {
     </header>
 
     <Transition name="page" mode="out-in">
-      <NewsView v-if="page === 'news'" @goto="page = $event" @reset="position = $event"></NewsView>
-      <JoinView v-else-if="page === 'join'" @goto="page = $event" @change="random++" @reset="random++"></JoinView>
-      <CreditsView v-else-if="page === 'credits'" @goto="page = $event" @change="random++" @reset="random++">
-      </CreditsView>
+      <NewsView v-if="page === 'news'" @goto="page = $event" @reset="position = $event" @camera="camera = $event">
+      </NewsView>
+      <JoinView v-else-if="page === 'join'" @goto="page = $event" @change="random++"></JoinView>
       <HomeView v-else @goto="page = $event"></HomeView>
     </Transition>
 
     <footer>
-      crédits ~ <a href="https://super8studio.eu/" target="_blank">Super8Studio</a> & <a href="https://damien-doussaud.com/" target="_blank">Namide</a>
+      crédits ~ <a href="https://super8studio.eu/" target="_blank">Super8Studio</a> & <a
+        href="https://damien-doussaud.com/" target="_blank">Namide</a>
     </footer>
 
   </main>
@@ -70,7 +91,9 @@ footer {
 }
 
 .page-enter-from,
-.page-leave-to { opacity: 0 }
+.page-leave-to {
+  opacity: 0
+}
 
 /* .page-enter,
 .page-leave { opacity: 1 } */

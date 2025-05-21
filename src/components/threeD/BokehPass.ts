@@ -13,11 +13,13 @@ import {
   BokehDepthShader,
   type BokehShaderUniforms,
 } from "three/examples/jsm/shaders/BokehShader2.js";
+import { DEBUG } from "../../conf";
 
 // Example: https://threejs.org/examples/?q=dof#webgl_postprocessing_dof2
 // Example : https://github.com/mrdoob/three.js/blob/ed4a0fe55438c633817d1e07d5ee698cae156ed4/examples/jsm/postprocessing/FilmPass.js#L19
 export class BokehPass extends Pass {
-  focalDepth = 20;
+  focalDepth = 10;
+  fstop = 10
 
   scene;
   camera;
@@ -59,14 +61,14 @@ export class BokehPass extends Pass {
 
     // Vignette
     this.uniforms["vignetting"].value = true;
-    this.uniforms["fstop"].value = 10; // Blur gradiant
+    this.uniforms["fstop"].value = this.fstop; // Blur gradiant
 
     // Enable focalDepth
-    this.uniforms['shaderFocus'].value = false;
-    this.uniforms['manualdof'].value = false; // Disable for better blur gradiant
-    
+    this.uniforms["shaderFocus"].value = false;
+    this.uniforms["manualdof"].value = false; // Disable for better blur gradiant
+
     // Debug
-    this.uniforms["showFocus"].value = false;
+    this.uniforms["showFocus"].value = DEBUG;
 
     // Blur
     this.uniforms["maxblur"].value = 3;
@@ -77,8 +79,6 @@ export class BokehPass extends Pass {
     this.uniforms["fringe"].value = 3.5; // RGB displace
 
     this.uniforms["noise"].value = true;
-
-    console.log(this.uniforms["focalDepth"].value)
 
     this.material = new ShaderMaterial({
       uniforms: this.uniforms as any,
@@ -122,7 +122,7 @@ export class BokehPass extends Pass {
 
     this.materialDepth.uniforms["mNear"].value = this.camera.near;
     this.materialDepth.uniforms["mFar"].value = this.camera.far;
-    const saveSceneOverrideMaterial = this.scene.overrideMaterial
+    const saveSceneOverrideMaterial = this.scene.overrideMaterial;
     this.scene.overrideMaterial = this.materialDepth;
     renderer.setRenderTarget(this.rtTextureDepth);
     renderer.clear();
@@ -132,7 +132,8 @@ export class BokehPass extends Pass {
     // render bokeh composite
 
     // this.uniforms["focalDepth"].value = Math.sin(Math.random() * Math.PI * 2) * 1000 + 1000;
-    this.uniforms["focalDepth"].value = this.focalDepth
+    this.uniforms["focalDepth"].value = this.focalDepth;
+    this.uniforms["fstop"].value = this.fstop;
     this.uniforms["tColor"].value = readBuffer.texture;
 
     if (this.renderToScreen) {
