@@ -178,7 +178,6 @@ export class ChessScene extends RenderScene {
   }
 
   reset(positions: string) {
-    console.log("RESET", positions);
     const positionnedPieces: {
       // name: PieceName;
       position: { x: number; y: number; z: number };

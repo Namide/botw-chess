@@ -18,7 +18,11 @@ watch(canvas, canvas => {
 
 watch(() => props.position, (position?: string) => {
   if (chessScene) {
-    chessScene.reset(position)
+    if (position) {
+      chessScene.reset(position)
+    } else {
+      chessScene.random()
+    }
   }
 })
 
