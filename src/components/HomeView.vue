@@ -4,7 +4,10 @@
 <template>
   <main>
     <h1>Échecs</h1>
-    <button @click="$emit('change')">Set random position</button>
+    <div>
+      <button @click="$emit('change')">Set random position</button><br>
+      <button @click="$emit('reset')">Use clean position</button>
+    </div>
   </main>
 </template>
 

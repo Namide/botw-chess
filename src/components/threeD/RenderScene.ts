@@ -92,7 +92,7 @@ export class RenderScene {
     const shaderVignette = VignetteShader;
 
     const effectVignette = new ShaderPass(shaderVignette);
-    effectVignette.uniforms["offset"].value = 1.2;
+    effectVignette.uniforms["offset"].value = 0;
     effectVignette.uniforms["darkness"].value = 0.95;
     this.disposeList.push(() => effectVignette.dispose());
 
@@ -156,7 +156,7 @@ export class RenderScene {
 
     composer.addPass(bokehPass);
     composer.addPass(bloomPass);
-    composer.addPass(effectFilm);
+    // composer.addPass(effectFilm);
     composer.addPass(effectVignette);
 
     // Hardware MSAA

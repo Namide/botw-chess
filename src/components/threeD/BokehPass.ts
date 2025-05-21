@@ -17,6 +17,8 @@ import {
 // Example: https://threejs.org/examples/?q=dof#webgl_postprocessing_dof2
 // Example : https://github.com/mrdoob/three.js/blob/ed4a0fe55438c633817d1e07d5ee698cae156ed4/examples/jsm/postprocessing/FilmPass.js#L19
 export class BokehPass extends Pass {
+  focalDepth = 20;
+
   scene;
   camera;
 
@@ -47,25 +49,43 @@ export class BokehPass extends Pass {
 
     const shader = BokehShader;
 
-    this.uniforms = UniformsUtils.clone(shader.uniforms as any) as BokehShaderUniforms;
-    // this.uniforms["tColor"].value = this.rtTextureColor.texture;
+    this.uniforms = UniformsUtils.clone(
+      shader.uniforms as any
+    ) as BokehShaderUniforms;
     this.uniforms["tDepth"].value = this.rtTextureDepth.texture;
     this.uniforms["textureWidth"].value = window.innerWidth;
     this.uniforms["textureHeight"].value = window.innerHeight;
-    // this.uniforms['depthblur'].value = true
-    this.uniforms['vignetting'].value = true
+    // this.uniforms['depthblur'].value = false
+
+    // Vignette
+    this.uniforms["vignetting"].value = true;
+    this.uniforms["fstop"].value = 10; // Blur gradiant
+
+    // Enable focalDepth
+    this.uniforms['shaderFocus'].value = false;
+    this.uniforms['manualdof'].value = false; // Disable for better blur gradiant
     
-    this.uniforms['maxblur'].value = 5
-    this.uniforms['focalDepth'].value = 50
-    this.uniforms['gain'].value = 2
-    this.uniforms['fringe'].value = 5
+    // Debug
+    this.uniforms["showFocus"].value = false;
+
+    // Blur
+    this.uniforms["maxblur"].value = 3;
+    this.uniforms["focalDepth"].value = this.focalDepth;
+
+    this.uniforms["gain"].value = 1; // Light power (better bloom)
+
+    this.uniforms["fringe"].value = 3.5; // RGB displace
+
+    this.uniforms["noise"].value = true;
+
+    console.log(this.uniforms["focalDepth"].value)
 
     this.material = new ShaderMaterial({
       uniforms: this.uniforms as any,
       vertexShader: shader.vertexShader,
       fragmentShader: shader.fragmentShader,
       defines: {
-        RINGS: 1,
+        RINGS: 2,
         SAMPLES: 4,
       },
     });
@@ -76,8 +96,6 @@ export class BokehPass extends Pass {
       vertexShader: depthShader.vertexShader,
       fragmentShader: depthShader.fragmentShader,
     });
-    this.materialDepth.uniforms["mNear"].value = camera.near;
-    this.materialDepth.uniforms["mFar"].value = camera.far;
 
     // ---
 
@@ -96,22 +114,27 @@ export class BokehPass extends Pass {
   render(
     renderer: WebGLRenderer,
     writeBuffer: WebGLRenderTarget,
-    readBuffer: WebGLRenderTarget,
+    readBuffer: WebGLRenderTarget
     // deltaTime: number,
     // maskActive: boolean
   ) {
-
     // render depth into texture
 
+    this.materialDepth.uniforms["mNear"].value = this.camera.near;
+    this.materialDepth.uniforms["mFar"].value = this.camera.far;
+    const saveSceneOverrideMaterial = this.scene.overrideMaterial
     this.scene.overrideMaterial = this.materialDepth;
     renderer.setRenderTarget(this.rtTextureDepth);
     renderer.clear();
     renderer.render(this.scene, this.camera);
-    this.scene.overrideMaterial = null;
+    this.scene.overrideMaterial = saveSceneOverrideMaterial;
 
     // render bokeh composite
 
+    // this.uniforms["focalDepth"].value = Math.sin(Math.random() * Math.PI * 2) * 1000 + 1000;
+    this.uniforms["focalDepth"].value = this.focalDepth
     this.uniforms["tColor"].value = readBuffer.texture;
+
     if (this.renderToScreen) {
       renderer.setRenderTarget(null);
       this.fsQuad.render(renderer);
@@ -126,7 +149,7 @@ export class BokehPass extends Pass {
     super.dispose();
     this.material.dispose();
     this.materialDepth.dispose();
-    this.fsQuad.dispose()
+    this.fsQuad.dispose();
     this.rtTextureColor.dispose();
     this.rtTextureDepth.dispose();
   }
