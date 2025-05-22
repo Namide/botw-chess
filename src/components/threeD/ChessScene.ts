@@ -488,6 +488,138 @@ export class ChessScene extends RenderScene {
     );
   }
 
+  threeDPositionToChessPosition(position: { x: number; z: number }) {
+    const boardPositions = this.meshesPositions
+      .map((line, i) =>
+        line.map((pos, j) => ({
+          ...pos,
+          i,
+          j,
+          distance: Math.sqrt(
+            (position.x - pos.x) ** 2 + (position.z - pos.z) ** 2
+          ),
+        }))
+      )
+      .flat(2);
+    boardPositions.sort((a, b) => a.distance - b.distance);
+    return this.ijToChessPosition(boardPositions[0].i, boardPositions[0].j);
+  }
+
+  ijToChessPosition(i: number, j: number) {
+    return "abcdefgh".charAt(7 - j) + (8 - i);
+  }
+
+  chessPositionToXYZ(position: string) {
+    const j = "hgfedcba".indexOf(position[0]);
+    const i = 8 - Number(position[1]);
+    return this.meshesPositions[i][j];
+  }
+
+  // chessPositionToPiece(position: string) {
+  //   const xyz = this.chessPositionToXYZ(position);
+  //   const pieces = piecesNames
+  //     .map((name) => this.meshes![name])
+  //     .map((piece) => ({
+  //       piece,
+  //       distance: Math.sqrt(
+  //         (xyz.x - piece.position.x) ** 2 + (xyz.z - piece.position.z) ** 2
+  //       ),
+  //     }));
+  //   pieces.sort((a, b) => a.distance - b.distance);
+  //   return pieces[0].piece;
+  // }
+
+  eatPiece(piece: Mesh, duration = 210) {
+    const ROT = Math.PI * 10;
+    const DIST = 20;
+
+    this.addTween(
+      new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
+        .to(
+          [
+            piece.position.x + Math.random() * DIST - DIST / 2,
+            piece.position.y + 10,
+            piece.position.z + Math.random() * DIST - DIST / 2,
+            piece.userData.rot[0] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[1] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[2] + ROT * Math.random() - ROT / 2,
+          ],
+          duration
+        )
+        .easing(Easing.Exponential.Out)
+        .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
+          piece.position.set(x, y, z);
+          piece.rotation.set(rx, ry, rz);
+        }),
+      () => {
+        piece.visible = false;
+      }
+    );
+  }
+
+  playPieceByPosition(from: string, to: string, duration = 450) {
+    const allPieces = piecesNames
+      .map((name) => this.meshes![name])
+      .filter((piece) => piece.visible)
+      .map((piece) => ({
+        piece,
+        position: this.threeDPositionToChessPosition(piece.position),
+      }));
+
+    const piece = allPieces.find((piece) => piece.position === from)!.piece;
+    const toXYZ = this.chessPositionToXYZ(to);
+
+    const eat = allPieces.find((piece) => piece.position === to);
+    if (eat) {
+      this.eatPiece(eat.piece);
+    }
+
+    console.log("🎮", from, to, piece.name, toXYZ);
+
+    const ROT = Math.PI / 4;
+    const GAP = 0;
+
+    this.addTween(
+      new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
+        .to(
+          [
+            piece.position.x,
+            piece.position.y + 4,
+            piece.position.z,
+            piece.userData.rot[0] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[1] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[2] + ROT * Math.random() - ROT / 2,
+          ],
+          duration / 2
+        )
+        .easing(Easing.Exponential.In)
+        .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
+          piece.position.set(x, y, z);
+          piece.rotation.set(rx, ry, rz);
+        }),
+      () => {
+        const { x, y, z } = toXYZ;
+        this.addTween(
+          new Tween(
+            [
+              ...piece.position.toArray(),
+              piece.rotation.x,
+              piece.rotation.y,
+              piece.rotation.z,
+            ],
+            false
+          )
+            .to([x, y, z, ...piece.userData.rot], duration / 2)
+            .easing(Easing.Quadratic.Out)
+            .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
+              piece.position.set(x, y, z);
+              piece.rotation.set(rx, ry, rz);
+            })
+        );
+      }
+    );
+  }
+
   dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
     const GAP = 0.1;
 
@@ -500,22 +632,7 @@ export class ChessScene extends RenderScene {
         })
     );
 
-    const boardPositions = this.meshesPositions
-      .map((line, j) =>
-        line.map((position, i) => ({
-          ...position,
-          j,
-          i,
-          distance: Math.sqrt(
-            (piece.position.x - position.x) ** 2 +
-              (piece.position.z - position.z) ** 2
-          ),
-        }))
-      )
-      .flat(2);
-
-    boardPositions.sort((a, b) => a.distance - b.distance);
-    return boardPositions[0];
+    return this.threeDPositionToChessPosition(piece.position);
   }
 
   random() {
