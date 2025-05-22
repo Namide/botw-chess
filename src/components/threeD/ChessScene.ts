@@ -1,13 +1,16 @@
 import {
   BufferGeometry,
+  DoubleSide,
   EquirectangularReflectionMapping,
   Light,
   Material,
   Mesh,
+  MeshPhysicalMaterial,
   NoColorSpace,
+  PlaneGeometry,
   TextureLoader,
 } from "three";
-import { GLTFLoader, GroundedSkybox } from "three/examples/jsm/Addons.js";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import botwChessSrc from "../../assets/botw-chess-008.glb?url";
 import environmentMapSrc from "../../assets/bg-3d.jpg?url";
 import { shuffle } from "../../pure/shuffle";
@@ -162,6 +165,26 @@ export class ChessScene extends RenderScene {
         this.moveCamera(START_CAMERA, 0);
         this.reset(START_POSITIONS, 0);
 
+        const meshTemp = new Mesh(
+          new PlaneGeometry(3, 5),
+          new MeshPhysicalMaterial( {
+					color: 0xEEEEEE,
+					metalness: 0,
+					roughness: 0.4,
+					ior: 1.5,
+					// alphaMap: texture,
+					// envMap: hdrEquirect,
+					// envMapIntensity: params.envMapIntensity,
+					transmission: 1, // use material.transmission for glass materials
+					specularIntensity: 1,
+					specularColor: 0xffffff,
+					opacity: 1,
+					side: DoubleSide,
+					transparent: true
+				} )
+        )
+        this.scene.add(meshTemp)
+
         // this.render();
         resolve(true);
       });
@@ -178,9 +201,11 @@ export class ChessScene extends RenderScene {
         this.scene.environment = texture;
         this.scene.environmentIntensity = 1.5;
 
-        const skybox = new GroundedSkybox(texture, 22, 150);
-        skybox.position.y = 0;
-        this.scene.add(skybox);
+        // const skybox = new GroundedSkybox(texture, 22, 150);
+        // skybox.position.y = 0;
+        // this.scene.add(skybox);
+
+        this.scene.background = texture
 
         resolve(true);
         // this.render();

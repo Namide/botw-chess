@@ -1,5 +1,6 @@
 dev:
 	docker run -ti --rm \
+	--name botw-chess \
 	-u "node" \
 	-v $(shell pwd):/usr/src/app \
 	-w /usr/src/app \
