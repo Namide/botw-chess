@@ -11,6 +11,7 @@
   "dependencies": {
     "detect-gpu": "^5.0.70",
     "gamestats.js": "^1.0.7",
+    "stockfish.js": "^10.0.2",
     "three": "^0.176.0",
     "twon": "^0.1.1",
     "vue": "^3.5.13"

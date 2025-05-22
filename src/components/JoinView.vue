@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import { onUnmounted } from 'vue';
+import { PlayChess } from './threeD/PlayChess';
 
+const playChess = new PlayChess()
+
+
+onUnmounted(() => {
+  playChess.dispose()
+})
 </script>
 
 <template>

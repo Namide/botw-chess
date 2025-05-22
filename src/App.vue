@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import HomeView from './components/HomeView.vue';
 import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';
@@ -18,10 +18,10 @@ watch(page, page => {
       position.value = START_POSITIONS
       camera.value = JSON.stringify(START_CAMERA)
       break
-    case 'join':
-      position.value = ''
-      camera.value = ''
-      break
+    // case 'join':
+    //   position.value = ''
+    //   camera.value = ''
+    //   break
   }
 })
 </script>

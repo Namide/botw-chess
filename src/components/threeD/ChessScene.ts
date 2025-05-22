@@ -1,13 +1,10 @@
 import {
   BufferGeometry,
-  DoubleSide,
   EquirectangularReflectionMapping,
   Light,
   Material,
   Mesh,
-  MeshPhysicalMaterial,
   NoColorSpace,
-  PlaneGeometry,
   TextureLoader,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
@@ -64,6 +61,8 @@ export class ChessScene extends RenderScene {
   >;
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
+  static instance: ChessScene;
+
   constructor({
     canvas,
     hq,
@@ -74,6 +73,8 @@ export class ChessScene extends RenderScene {
     onReady: () => void;
   }) {
     super({ canvas, hq, onReady });
+
+    ChessScene.instance = this;
 
     // DEBUG
     if (DEBUG) {
@@ -165,25 +166,25 @@ export class ChessScene extends RenderScene {
         this.moveCamera(START_CAMERA, 0);
         this.reset(START_POSITIONS, 0);
 
-        const meshTemp = new Mesh(
-          new PlaneGeometry(3, 5),
-          new MeshPhysicalMaterial( {
-					color: 0xEEEEEE,
-					metalness: 0,
-					roughness: 0.4,
-					ior: 1.5,
-					// alphaMap: texture,
-					// envMap: hdrEquirect,
-					// envMapIntensity: params.envMapIntensity,
-					transmission: 1, // use material.transmission for glass materials
-					specularIntensity: 1,
-					specularColor: 0xffffff,
-					opacity: 1,
-					side: DoubleSide,
-					transparent: true
-				} )
-        )
-        this.scene.add(meshTemp)
+        // const meshTemp = new Mesh(
+        //   new PlaneGeometry(3, 5),
+        //   new MeshPhysicalMaterial( {
+        // 	color: 0xEEEEEE,
+        // 	metalness: 0,
+        // 	roughness: 0.4,
+        // 	ior: 1.5,
+        // 	// alphaMap: texture,
+        // 	// envMap: hdrEquirect,
+        // 	// envMapIntensity: params.envMapIntensity,
+        // 	transmission: 1, // use material.transmission for glass materials
+        // 	specularIntensity: 1,
+        // 	specularColor: 0xffffff,
+        // 	opacity: 1,
+        // 	side: DoubleSide,
+        // 	transparent: true
+        // } )
+        // )
+        // this.scene.add(meshTemp)
 
         // this.render();
         resolve(true);
@@ -205,7 +206,7 @@ export class ChessScene extends RenderScene {
         // skybox.position.y = 0;
         // this.scene.add(skybox);
 
-        this.scene.background = texture
+        this.scene.background = texture;
 
         resolve(true);
         // this.render();
@@ -253,6 +254,7 @@ export class ChessScene extends RenderScene {
     } = {},
     duration = CLEAR_BOARD_DURATION
   ) {
+    const enabled = this.controls.enabled;
     this.controls.enabled = false;
 
     const startRads = Math.atan2(
@@ -330,7 +332,7 @@ export class ChessScene extends RenderScene {
             this.maxblur = maxblur;
           }
         ),
-      () => (this.controls.enabled = true)
+      () => (this.controls.enabled = enabled)
     );
   }
 
@@ -379,7 +381,7 @@ export class ChessScene extends RenderScene {
     position?: { x: number; y: number; z: number },
     duration = CLEAR_BOARD_DURATION
   ) {
-    const GAP = 0.5;
+    const GAP = 0.1;
 
     // Save initial rotation
     if (!piece.userData.rot) {
@@ -447,6 +449,54 @@ export class ChessScene extends RenderScene {
           piece.visible = false;
         }
       }
+    );
+  }
+
+  dragPiece(piece: Mesh<BufferGeometry, Material>, duration = 500) {
+    const GAP = 0.1;
+
+    // Save initial rotation
+    if (!piece.userData.rot) {
+      piece.userData.rot = [
+        piece.rotation.x,
+        piece.rotation.y,
+        piece.rotation.z,
+      ] as const;
+    }
+
+    const ROT = Math.random() / 4;
+    const ELEVATION = 4;
+
+    this.addTween(
+      new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
+        .to(
+          [
+            piece.position.x,
+            piece.position.y + ELEVATION,
+            piece.position.z,
+            piece.userData.rot[0] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[1] + ROT * Math.random() - ROT / 2,
+            piece.userData.rot[2] + ROT * Math.random() - ROT / 2,
+          ],
+          duration
+        )
+        .easing(Easing.Exponential.Out)
+        .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
+          piece.position.set(x, y, z);
+          piece.rotation.set(rx, ry, rz);
+        })
+    );
+  }
+
+  dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
+    const GAP = 0.1;
+    this.addTween(
+      new Tween([piece.position.y], false)
+        .to([0], duration)
+        .easing(Easing.Quadratic.In)
+        .onUpdate(([y]: number[]) => {
+          piece.position.y = y;
+        })
     );
   }
 

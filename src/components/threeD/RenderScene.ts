@@ -23,7 +23,7 @@ import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import GameStats from "gamestats.js";
 import { DEBUG, START_CAMERA } from "../../conf";
 
-let stats:GameStats
+let stats: GameStats;
 
 if (DEBUG) {
   stats = new GameStats({
@@ -98,7 +98,11 @@ export class RenderScene {
       START_CAMERA.targetPosition.z
     );
     this.controls.update();
-    this.disposeList.push(() => this.controls.dispose());
+    this.disposeList.push(() => this.controls?.dispose());
+
+    if (!DEBUG) {
+      this.controls.enabled = false;
+    }
 
     const { composer, bokehPass } = this.initPostProcess();
     this.composer = composer;
@@ -231,6 +235,11 @@ export class RenderScene {
 
   set maxblur(value: number) {
     (this.bokehPass.uniforms as any).maxblur.value = value;
+  }
+
+  removeTween(tween: Tween<any>) {
+    const i = this.tweens.indexOf(tween);
+    this.tweens.splice(i, 0);
   }
 
   addTween(tween: Tween<any>, onComplete?: () => void) {
