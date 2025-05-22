@@ -116,33 +116,52 @@ article {
 }
 
 .news-container {
+  --prespective: 1000px;
+
   width: 75%;
-  perspective: 1000px;
+  perspective: var(--prespective);
   perspective-origin: center center;
 }
 
 section {
-  padding: 2rem;
   box-sizing: border-box;
   line-height: 1.6;
   max-width: 720px;
   margin: 0 auto;
+
+  // transform-origin: center center;
+  transform-style: preserve-3d;
+  perspective: var(--prespective);
+}
+
+section:before {
+  --padding: 2rem;
+  content: "";
+  display: block;
+  position: absolute;
+  top: calc(-1 * var(--padding));
+  left: calc(-1 * var(--padding));
+  width: calc(100% + 2 * var(--padding));
+  height: calc(100% + 2 * var(--padding));
+
   background-color: #00000050;
   backdrop-filter: blur(16px);
   border-radius: 2rem;
   border: 2px solid #FFFFFF10;
-
-  transform-origin: center center;
-  transform-style: preserve-3d;
 }
 
 h2 {
+  color: #FFFFFF;
   font-size: 2.4rem;
   margin: 0;
+  transform: translateZ(40px);
 }
 
 p {
+  color: #FFFFFF;
   margin: 0;
+  opacity: 1;
+  transform: translateZ(20px);
 }
 
 .news-1 {
@@ -179,11 +198,11 @@ p {
 .news-leave { opacity: 1 } */
 
 .news-enter-active {
-  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.03,.11,.11,.99), line-height 0.75s ease-out;
+  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.03, .11, .11, .99), line-height 0.75s ease-out;
 }
 
 .news-leave-active {
-  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.81,0,.58,.99), line-height 0.75s ease-in;
+  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.81, 0, .58, .99), line-height 0.75s ease-in;
 }
 </style>
 7
