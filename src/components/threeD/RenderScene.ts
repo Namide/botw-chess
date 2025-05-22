@@ -7,6 +7,7 @@ import {
   WebGLRenderer,
 } from "three";
 import {
+  BokehPass,
   EffectComposer,
   FilmPass,
   GammaCorrectionShader,
@@ -19,7 +20,6 @@ import {
   VignetteShader,
 } from "three/examples/jsm/Addons.js";
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
-import { BokehPass } from "./BokehPass";
 import GameStats from "gamestats.js";
 import { START_CAMERA } from "../../conf";
 
@@ -99,7 +99,9 @@ export class RenderScene {
     const { composer, bokehPass } = this.initPostProcess();
     this.composer = composer;
     this.bokehPass = bokehPass;
-    this.bokehPass.focalDepth = START_CAMERA.focalDepth;
+    this.focus = START_CAMERA.focus;
+    this.aperture = START_CAMERA.aperture;
+    this.maxblur = START_CAMERA.maxblur;
 
     window.addEventListener("resize", this.onWindowResize);
 
@@ -136,10 +138,17 @@ export class RenderScene {
     bloomPass.radius = 0;
     this.disposeList.push(() => bloomPass.dispose());
 
-    const bokehPass = new BokehPass({ scene: this.scene, camera: this.camera });
+    // const bokehPass = new BokehPass2({ scene: this.scene, camera: this.camera });
+    const bokehPass = new BokehPass(this.scene, this.camera, {
+      focus: 5.0,
+      aperture: 0.005,
+      maxblur: 0.01,
+    });
     this.disposeList.push(() => bokehPass.dispose());
 
-    const effectFilm = new FilmPass(0.35);
+    console.log(bokehPass);
+
+    const effectFilm = new FilmPass(0.05);
     this.disposeList.push(() => effectFilm.dispose());
 
     // const effectFilmBW = new FilmPass(0.35, true);
@@ -165,7 +174,7 @@ export class RenderScene {
         selects: null,
       });
       ssrPass.distanceAttenuation = true;
-      ssrPass.maxDistance = 2;
+      ssrPass.maxDistance = 5; // 2
       this.disposeList.push(() => ssrPass.dispose());
       composer.addPass(ssrPass);
     } else {
@@ -182,7 +191,7 @@ export class RenderScene {
 
     composer.addPass(bokehPass);
     composer.addPass(bloomPass);
-    // composer.addPass(effectFilm);
+    composer.addPass(effectFilm);
     composer.addPass(effectVignette);
 
     // Hardware MSAA
@@ -192,6 +201,30 @@ export class RenderScene {
     // }
 
     return { composer, bokehPass };
+  }
+
+  get focus() {
+    return (this.bokehPass.uniforms as any).focus.value;
+  }
+
+  set focus(value: number) {
+    (this.bokehPass.uniforms as any).focus.value = value;
+  }
+
+  get aperture() {
+    return (this.bokehPass.uniforms as any).aperture.value;
+  }
+
+  set aperture(value: number) {
+    (this.bokehPass.uniforms as any).aperture.value = value;
+  }
+
+  get maxblur() {
+    return (this.bokehPass.uniforms as any).maxblur.value;
+  }
+
+  set maxblur(value: number) {
+    (this.bokehPass.uniforms as any).maxblur.value = value;
   }
 
   addTween(tween: Tween<any>, onComplete?: () => void) {

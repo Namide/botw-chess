@@ -23,7 +23,10 @@ watch(newsID, (id) => {
           "y": 0.6304512272090906,
           "z": -0.23384776126681142
         },
-        "focalDepth": 2
+        "focus": 26,
+
+        aperture: 0.002,
+        maxblur: 0.01,
       }))
       break;
     case 1:
@@ -39,7 +42,9 @@ watch(newsID, (id) => {
           "y": 0.4063302596931356,
           "z": -2.7308367719630935
         },
-        "focalDepth": 8
+        "focus": 6.2,
+        aperture: 0.005,
+        maxblur: 0.015,
       }))
       break;
     case 2:
@@ -55,7 +60,9 @@ watch(newsID, (id) => {
           "y": 3.0373653207777243,
           "z": 0.1274042016700795
         },
-        "focalDepth": 10
+        "focus": 8,
+        aperture: 0.005,
+        maxblur: 0.02,
       }))
       break;
   }

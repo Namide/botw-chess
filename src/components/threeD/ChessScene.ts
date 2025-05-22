@@ -1,4 +1,5 @@
 import {
+  BufferGeometry,
   EquirectangularReflectionMapping,
   Light,
   Material,
@@ -7,8 +8,8 @@ import {
   TextureLoader,
 } from "three";
 import { GLTFLoader, GroundedSkybox } from "three/examples/jsm/Addons.js";
-import botwChessSrc from "../../assets/botw-chess-006.glb?url";
-import environmentMapSrc from "../../assets/bg-draft-stadium-001.jpg?url";
+import botwChessSrc from "../../assets/botw-chess-008.glb?url";
+import environmentMapSrc from "../../assets/bg-3d.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
 import { RenderScene } from "./RenderScene";
@@ -57,7 +58,15 @@ export class ChessScene extends RenderScene {
   meshes?: Record<"table" | "board" | PieceName, Mesh>;
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
-  constructor({ canvas, hq, onReady }: { canvas: HTMLCanvasElement; hq: boolean, onReady: () => void }) {
+  constructor({
+    canvas,
+    hq,
+    onReady,
+  }: {
+    canvas: HTMLCanvasElement;
+    hq: boolean;
+    onReady: () => void;
+  }) {
     super({ canvas, hq, onReady });
 
     // DEBUG
@@ -79,7 +88,9 @@ export class ChessScene extends RenderScene {
                   y: this.controls.target.y,
                   z: this.controls.target.z,
                 },
-                focalDepth: this.bokehPass.focalDepth,
+                focus: this.focus,
+                aperture: this.aperture,
+                maxblur: this.maxblur,
               },
               undefined,
               2
@@ -119,14 +130,14 @@ export class ChessScene extends RenderScene {
           for (let j = 0; j < 8; j++) {
             this.meshesPositions[i][j] = {
               x:
-                (this.meshes!.R2.position.x - this.meshes!.r1.position.x) *
+                (this.meshes!.R2.position.x - this.meshes!.r2.position.x) *
                   (i / 7) +
-                this.meshes!.r1.position.x,
-              y: (this.meshes!.R2.position.y + this.meshes!.r1.position.y) / 2,
+                this.meshes!.r2.position.x,
+              y: (this.meshes!.R2.position.y + this.meshes!.r2.position.y) / 2,
               z:
-                (this.meshes!.R2.position.z - this.meshes!.r1.position.z) *
+                (this.meshes!.R2.position.z - this.meshes!.r2.position.z) *
                   (j / 7) +
-                this.meshes!.r1.position.z,
+                this.meshes!.r2.position.z,
             };
           }
         }
@@ -162,7 +173,7 @@ export class ChessScene extends RenderScene {
         this.disposeList.push(() => texture.dispose());
 
         this.scene.environment = texture;
-        this.scene.environmentIntensity = 0.8;
+        this.scene.environmentIntensity = 1.5;
 
         const skybox = new GroundedSkybox(texture, 22, 150);
         skybox.position.y = 0;
@@ -202,11 +213,15 @@ export class ChessScene extends RenderScene {
           Math.random()
         ),
       },
-      focalDepth = 50,
+      focus = 50,
+      aperture = 0.005,
+      maxblur = 0.01,
     }: {
       cameraPosition?: { x: number; y: number; z: number };
       targetPosition?: { x: number; y: number; z: number };
-      focalDepth?: number;
+      focus?: number;
+      aperture?: number;
+      maxblur?: number;
     } = {},
     duration = CLEAR_BOARD_DURATION
   ) {
@@ -228,7 +243,9 @@ export class ChessScene extends RenderScene {
           startDist,
           this.camera.position.y,
           ...this.controls.target.toArray(),
-          this.bokehPass.focalDepth,
+          this.focus,
+          this.aperture,
+          this.maxblur,
         ],
         false
       )
@@ -253,12 +270,25 @@ export class ChessScene extends RenderScene {
               targetPosition.x,
               targetPosition.y,
               targetPosition.z,
-              focalDepth,
+              focus,
+
+              aperture,
+              maxblur,
             ];
           })()
         )
         .onUpdate(
-          ([rads, dist, elevation, targetX, targetY, targetZ, focalDepth]) => {
+          ([
+            rads,
+            dist,
+            elevation,
+            targetX,
+            targetY,
+            targetZ,
+            focus,
+            aperture,
+            maxblur,
+          ]) => {
             this.camera.position.set(
               Math.cos(rads) * dist + this.controls.target.x,
               elevation,
@@ -266,7 +296,9 @@ export class ChessScene extends RenderScene {
             );
             this.controls.target.set(targetX, targetY, targetZ);
             this.controls.update();
-            this.bokehPass.focalDepth = focalDepth;
+            this.focus = focus;
+            this.aperture = aperture;
+            this.maxblur = maxblur;
           }
         ),
       () => (this.controls.enabled = true)
@@ -314,7 +346,7 @@ export class ChessScene extends RenderScene {
   }
 
   movePiece(
-    piece: Mesh,
+    piece: Mesh<BufferGeometry, Material>,
     position?: { x: number; y: number; z: number },
     duration = CLEAR_BOARD_DURATION
   ) {

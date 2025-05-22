@@ -21,19 +21,6 @@ watch(page, page => {
     case 'join':
       position.value = ''
       camera.value = ''
-      // camera.value = JSON.stringify({
-      //   cameraPosition: {
-      //     x: Math.random() * 20 - 10,
-      //     y: 1.5,
-      //     z: Math.random() * 20 - 10,
-      //   },
-      //   targetPosition: {
-      //     x: 0,
-      //     y: 1,
-      //     z: 0,
-      //   },
-      //   focalDepth: 50,
-      // })
       break
   }
 })
