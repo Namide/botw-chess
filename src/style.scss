@@ -13,14 +13,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+@font-face {
+  font-family: "Trickster";
+  src: url("./assets/Aukera.woff2") format("woff2");
+}
+
 body {
   overflow: hidden;
+  font-family: Trickster, Arial, Helvetica, sans-serif;
 }
 
 a,
 button {
   pointer-events: initial;
   cursor: pointer;
+  font-family: Trickster, Arial, Helvetica, sans-serif;
 }
 
 a {

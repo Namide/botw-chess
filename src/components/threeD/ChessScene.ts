@@ -55,7 +55,7 @@ const piecesNames = [
 type PieceName = (typeof piecesNames)[number];
 
 export class ChessScene extends RenderScene {
-  meshes?: Record<"table" | "board" | PieceName, Mesh>;
+  meshes?: Record<"table" | "board" | PieceName, Mesh<BufferGeometry, Material>>;
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
   constructor({

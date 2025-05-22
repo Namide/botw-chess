@@ -79,21 +79,21 @@ watch(newsID, (id) => {
 
     <div class="news-container">
       <Transition name="news" mode="out-in">
-        <section v-if="newsID === 0">
+        <section v-if="newsID === 0" class="news-1">
           <h2>Tokyo, le 21 mai 2025</h2>
           <p>Nous continuons de faire parler de nous dans le monde des échecs en ligne ! C'est cette fois notre champion
             H4ker35 qui remporte le tournoi de bullet "Champions Chess Tour" au Japon en imposant une variante peu
             commune
             de la défense sicilienne.</p>
         </section>
-        <section v-else-if="newsID === 1">
+        <section v-else-if="newsID === 1" class="news-2">
           <h2>Séoul, le 10 avril 2025</h2>
           <p>Après une série de victoires impressionnantes, notre espoir féminin M0t0k0 a utilisé un clouage pour mettre
             le champion du monde hors course. Ce coup magistral lui octroie l'une des neuf places disponibles pour la
             richement dotée
             Coupe du Monde d'e-sport de cet été !</p>
         </section>
-        <section v-else-if="newsID === 2">
+        <section v-else-if="newsID === 2" class="news-3">
           <h2>Online, le 23 mars 2025</h2>
           <p>En demi finale du "Chess LPL split", sur une ouverture classique, H4ker35 a rapidement transformé la partie
             en un jeu tactique complexe pour finalement placer une déviation qui lui permettra de s'imposer !</p>
@@ -113,6 +113,8 @@ article {
 
 .news-container {
   width: 75%;
+  perspective: 1000px;
+  perspective-origin: center center;
 }
 
 section {
@@ -121,6 +123,37 @@ section {
   line-height: 1.6;
   max-width: 720px;
   margin: 0 auto;
+  background-color: #00000050;
+  backdrop-filter: blur(16px);
+  border-radius: 2rem;
+  border: 2px solid #FFFFFF10;
+
+  transform-origin: center center;
+  transform-style: preserve-3d;
+}
+
+h2 {
+  font-size: 2.4rem;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.news-1 {
+  margin: 0 0 0 auto;
+  transform: translateY(75%) rotate3d(0.5, -1, 0, 15deg);
+}
+
+.news-2 {
+  margin: 0 0 0 auto;
+  transform: translateY(-100%) rotate3d(-0.5, -1, 0, 15deg);
+}
+
+.news-3 {
+  margin: 0 auto 0 0;
+  transform: translateY(100%) rotate3d(1, 1, 0, 15deg);
 }
 
 .news-enter-from,
@@ -130,12 +163,12 @@ section {
 
 .news-enter-from {
   line-height: 1.8;
-  transform: translateY(-20%);
+  transform: translateX(-200%) translateZ(500px) rotate3d(0, 1, 0, 90deg);
 }
 
 .news-leave-to {
   line-height: 1.8;
-  transform: translateY(20%);
+  transform: translateX(200%) translateZ(500px) rotate3d(0, 1, 0, 90deg);
 }
 
 /* .news-enter,
