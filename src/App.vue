@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import HomeView from './components/HomeView.vue';
 import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';

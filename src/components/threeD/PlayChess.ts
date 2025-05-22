@@ -9,12 +9,6 @@ import { Chess } from "chess.js";
 // stockfish-nnue-17-lite.wasm
 
 const PLAYER_COLOR = "white";
-const BOT_COLOR = "black";
-
-type GameData = {
-  turn: "w" | "b";
-  isGameOver: boolean;
-};
 
 // https://github.com/nmrugg/stockfish.js/blob/master/examples/enginegame.js
 export class PlayChess {

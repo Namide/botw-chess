@@ -453,8 +453,6 @@ export class ChessScene extends RenderScene {
   }
 
   dragPiece(piece: Mesh<BufferGeometry, Material>, duration = 500) {
-    const GAP = 0.1;
-
     // Save initial rotation
     if (!piece.userData.rot) {
       piece.userData.rot = [
@@ -577,7 +575,6 @@ export class ChessScene extends RenderScene {
     console.log("🎮", from, to, piece.name, toXYZ);
 
     const ROT = Math.PI / 4;
-    const GAP = 0;
 
     this.addTween(
       new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
@@ -621,8 +618,6 @@ export class ChessScene extends RenderScene {
   }
 
   dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
-    const GAP = 0.1;
-
     this.addTween(
       new Tween([piece.position.y], false)
         .to([0], duration)
