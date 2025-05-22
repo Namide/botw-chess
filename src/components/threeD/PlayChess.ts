@@ -15,6 +15,7 @@ export class PlayChess {
   pieceElevation = 0;
   dragTween?: Tween<[number]>;
 
+  // https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html
   constructor() {
     this.chessScene = ChessScene.instance;
 
@@ -22,7 +23,7 @@ export class PlayChess {
     this.stockfish.addEventListener("message", function (e) {
       console.log(e.data);
     });
-    this.stockfish.postMessage("uci");
+    // this.stockfish.postMessage("uci");
 
     this.chessScene.reset(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -46,10 +47,35 @@ export class PlayChess {
     this.controls = this.initControls();
   }
 
+  start() {
+    // this.stockfish.postMessage("go")
+    this.stockfish.postMessage("ucinewgame");
+    this.stockfish.postMessage("isready");
+
+    // ('position startpos moves' + get_moves())
+  }
+
   initControls() {
-    const piecesNames = ['R1', 'R2', 'N1', 'N2', 'B1', 'B2', 'Q', 'K', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8'] as const
+    const piecesNames = [
+      "R1",
+      "R2",
+      "N1",
+      "N2",
+      "B1",
+      "B2",
+      "Q",
+      "K",
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8",
+    ] as const;
     const controls = new DragControls(
-      piecesNames.map(name => this.chessScene.meshes![name]),
+      piecesNames.map((name) => this.chessScene.meshes![name]),
       this.chessScene.camera,
       this.chessScene.renderer.domElement
     );
@@ -102,9 +128,9 @@ export class PlayChess {
     if (this.dragTween) {
       this.dragTween.end();
       this.chessScene.removeTween(this.dragTween);
-      this.dragTween = undefined
+      this.dragTween = undefined;
     }
-    this.chessScene.dropPiece(event.object as Mesh<BufferGeometry, Material>);
+    console.log(this.chessScene.dropPiece(event.object as Mesh<BufferGeometry, Material>));
   }
 
   onHoverOn(

@@ -490,6 +490,7 @@ export class ChessScene extends RenderScene {
 
   dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
     const GAP = 0.1;
+
     this.addTween(
       new Tween([piece.position.y], false)
         .to([0], duration)
@@ -498,6 +499,23 @@ export class ChessScene extends RenderScene {
           piece.position.y = y;
         })
     );
+
+    const boardPositions = this.meshesPositions
+      .map((line, j) =>
+        line.map((position, i) => ({
+          ...position,
+          j,
+          i,
+          distance: Math.sqrt(
+            (piece.position.x - position.x) ** 2 +
+              (piece.position.z - position.z) ** 2
+          ),
+        }))
+      )
+      .flat(2);
+
+    boardPositions.sort((a, b) => a.distance - b.distance);
+    return boardPositions[0];
   }
 
   random() {
