@@ -55,7 +55,10 @@ const piecesNames = [
 type PieceName = (typeof piecesNames)[number];
 
 export class ChessScene extends RenderScene {
-  meshes?: Record<"table" | "board" | PieceName, Mesh<BufferGeometry, Material>>;
+  meshes?: Record<
+    "table" | "board" | PieceName,
+    Mesh<BufferGeometry, Material>
+  >;
   meshesPositions: { x: number; y: number; z: number }[][] = [];
 
   constructor({
@@ -249,8 +252,6 @@ export class ChessScene extends RenderScene {
         ],
         false
       )
-        .duration(duration)
-        .easing(Easing.Exponential.InOut)
         .to(
           (() => {
             const rads = Math.atan2(
@@ -275,8 +276,10 @@ export class ChessScene extends RenderScene {
               aperture,
               maxblur,
             ];
-          })()
+          })(),
+          duration
         )
+        .easing(Easing.Exponential.InOut)
         .onUpdate(
           ([
             rads,
@@ -295,7 +298,8 @@ export class ChessScene extends RenderScene {
               Math.sin(rads) * dist + this.controls.target.z
             );
             this.controls.target.set(targetX, targetY, targetZ);
-            this.controls.update();
+            this.camera.lookAt(this.controls.target);
+            // this.controls.update();
             this.focus = focus;
             this.aperture = aperture;
             this.maxblur = maxblur;

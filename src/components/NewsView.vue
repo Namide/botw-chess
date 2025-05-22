@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
-const newsID = ref(0)
+const newsID = ref(-1)
 const emits = defineEmits<{
   (e: 'goto', page: "home" | "news" | "join"): void
   (e: 'camera', page: string): void
   (e: 'reset', position: string): void
 }>()
+
+onMounted(() => {
+  newsID.value = 0
+})
 
 watch(newsID, (id) => {
   switch (id) {
@@ -158,16 +162,16 @@ p {
 
 .news-enter-from,
 .news-leave-to {
-  opacity: 0
+  // opacity: 0
 }
 
 .news-enter-from {
-  line-height: 1.8;
+  // line-height: 1.8;
   transform: translateX(-200%) translateZ(500px) rotate3d(0, 1, 0, 90deg);
 }
 
 .news-leave-to {
-  line-height: 1.8;
+  // line-height: 1.8;
   transform: translateX(200%) translateZ(500px) rotate3d(0, 1, 0, 90deg);
 }
 
@@ -175,10 +179,11 @@ p {
 .news-leave { opacity: 1 } */
 
 .news-enter-active {
-  transition: opacity 0.5s linear, transform 0.5s ease-out, line-height 0.5s ease-out;
+  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.03,.11,.11,.99), line-height 0.75s ease-out;
 }
 
 .news-leave-active {
-  transition: opacity 0.5s linear, transform 0.5s ease-in, line-height 0.5s ease-in;
+  transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.81,0,.58,.99), line-height 0.75s ease-in;
 }
 </style>
+7

@@ -21,12 +21,16 @@ import {
 } from "three/examples/jsm/Addons.js";
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import GameStats from "gamestats.js";
-import { START_CAMERA } from "../../conf";
+import { DEBUG, START_CAMERA } from "../../conf";
 
-const stats = new GameStats({
-  // targetFPS: 60
-});
-document.body.appendChild(stats.dom);
+let stats:GameStats
+
+if (DEBUG) {
+  stats = new GameStats({
+    // targetFPS: 60
+  });
+  document.body.appendChild(stats.dom);
+}
 
 export class RenderScene {
   scene;
@@ -146,7 +150,9 @@ export class RenderScene {
     });
     this.disposeList.push(() => bokehPass.dispose());
 
-    console.log(bokehPass);
+    if (DEBUG) {
+      console.log(bokehPass);
+    }
 
     const effectFilm = new FilmPass(0.05);
     this.disposeList.push(() => effectFilm.dispose());
@@ -241,14 +247,14 @@ export class RenderScene {
   }
 
   tick() {
-    stats.begin();
+    stats?.begin();
     for (let i = this.tweens.length - 1; i >= 0; i--) {
       this.tweens[i].update();
     }
 
     this.render();
 
-    stats.end();
+    stats?.end();
   }
 
   render() {
