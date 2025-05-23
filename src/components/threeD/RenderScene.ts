@@ -298,8 +298,10 @@ export class RenderScene {
     this.tweens.splice(i, 0);
   }
 
-  cleanTweens(type: 'camera' | 'piece' | 'other') {
+  clearTweens(type: 'camera' | 'piece' | 'other') {
     for (const { tween } of this.tweens.filter(data => data.type === type)) {
+      tween.onUpdate(() => 0)
+      tween.onComplete(() => 0)
       this.removeTween(tween)
     }
   }

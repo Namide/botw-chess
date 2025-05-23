@@ -290,6 +290,8 @@ export class ChessScene extends RenderScene {
       easing?: typeof Easing.Exponential.InOut;
     } = {}
   ) {
+    this.clearTweens("camera");
+
     const enabled = this.controls.enabled;
     this.controls.enabled = false;
 
@@ -398,6 +400,8 @@ export class ChessScene extends RenderScene {
   }
 
   reset(positions: string, duration = CLEAR_BOARD_DURATION) {
+    this.clearTweens("piece");
+
     const positionnedPieces: {
       position: { x: number; y: number; z: number };
       // square: Square;
