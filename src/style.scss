@@ -1,5 +1,26 @@
+@font-face {
+  font-family: "Trickster";
+  src: url("./assets/Aukera.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Source Code Pro";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/source-code-pro-v23-latin-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Source Code Pro";
+  font-style: normal;
+  font-weight: 700;
+  src: url("./assets/source-code-pro-v23-latin-700.woff2") format("woff2");
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Source Code Pro", Arial, Helvetica, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -13,31 +34,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@font-face {
-  font-family: "Trickster";
-  src: url("./assets/Aukera.woff2") format("woff2");
-}
-
-@font-face {
-  font-display: swap;
-  font-family: 'Source Code Pro';
-  font-style: normal;
-  font-weight: 400;
-  src: url('./assets/source-code-pro-v23-latin-regular.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: 'Source Code Pro';
-  font-style: normal;
-  font-weight: 700;
-  src: url('./assets/source-code-pro-v23-latin-700.woff2') format('woff2');
-}
-
-
 body {
   overflow: hidden;
-  font-family: "Source Code Pro", Arial, Helvetica, sans-serif;
 }
 
 a,
@@ -47,16 +45,46 @@ button {
   font-family: "Source Code Pro", Arial, Helvetica, sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: "Trickster", Arial, Helvetica, sans-serif;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #7c0000;
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  text-decoration: underline;
+}
+
+.nav,
+.back {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin: 5vh auto;
+
+  button {
+    font-size: 1.25rem;
+    border: none;
+    background: none;
+  }
+
+  button:hover {
+    text-decoration: underline;
+  }
+}
+
+.back {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  margin: 0;
 }

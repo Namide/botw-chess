@@ -101,19 +101,19 @@ export class PlayChess {
     // isKingsideCastle() isQueensideCastle()
     if (detail.piece === "k") {
       if (detail.to === "g1" && detail.from === "e1") {
-        this.chessScene.playPieceBySquare("h1", "f1", detail.piece);
+        this.chessScene.playPieceBySquare("h1", "f1", "R");
       }
 
       if (detail.to === "c1" && detail.from === "e1") {
-        this.chessScene.playPieceBySquare("a1", "d1", detail.piece);
+        this.chessScene.playPieceBySquare("a1", "d1", "R");
       }
 
       if (detail.to === "g8" && detail.from === "e8") {
-        this.chessScene.playPieceBySquare("h8", "f8", detail.piece);
+        this.chessScene.playPieceBySquare("h8", "f8", "r");
       }
 
       if (detail.to === "c8" && detail.from === "e8") {
-        this.chessScene.playPieceBySquare("a8", "d8", detail.piece);
+        this.chessScene.playPieceBySquare("a8", "d8", "r");
       }
     }
 
@@ -212,19 +212,13 @@ export class PlayChess {
     // board.position(game.fen());
     // updateClock();
 
-    if (this.game.isCheck() && this.game.turn() === PLAYER_COLOR) {
-      this.onCheck?.();
-    }
-
     if (this.game.isCheckmate() && this.game.turn() === PLAYER_COLOR) {
       this.onLose?.();
-    }
-
-    if (this.game.isCheckmate() && this.game.turn() !== PLAYER_COLOR) {
+    } else if (this.game.isCheckmate() && this.game.turn() !== PLAYER_COLOR) {
       this.onWin?.();
-    }
-
-    if (this.game.isDraw() || this.game.isStalemate()) {
+    } else if (this.game.isCheck() && this.game.turn() === PLAYER_COLOR) {
+      this.onCheck?.();
+    } else if (this.game.isDraw() || this.game.isStalemate()) {
       this.onDraw?.();
     }
 
@@ -355,7 +349,7 @@ export class PlayChess {
           event.object.position.y = y;
         }
       });
-    this.chessScene.addTween(this.dragTween);
+    this.chessScene.addTween(this.dragTween, "piece");
 
     this.dragFrom = this.chessScene.threeDPositionToChessPosition(
       event.object.position

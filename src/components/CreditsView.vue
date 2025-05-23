@@ -6,7 +6,9 @@ import GlassBox from './GlassBox.vue';
 <template>
   <article>
 
-    <button @click="$emit('goto', 'home')">Return</button>
+    <nav class="back">
+      <button @click="$emit('goto', 'home')">< revenir</button>
+    </nav>
 
     <GlassBox :data="{ title: 'crédits' }" class="section">
       <ul>
@@ -26,9 +28,12 @@ article {
   display: flex;
   width: 100%;
   align-items: center;
+  flex-direction: column;
+  flex: 1;
+  margin: 0 auto 15vh;
 }
 
-section {
+.section {
   margin: auto;
 }
 

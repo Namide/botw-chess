@@ -3,9 +3,16 @@
 
 <template>
   <article>
-    <button @click="$emit('goto', 'news')">Nos actus</button><br>
-    <button @click="$emit('goto', 'join')">Nous rejoindre</button>
+    <nav class="nav">
+      <button @click="$emit('goto', 'news')">nos actus</button>
+      <button @click="$emit('goto', 'join')">nous rejoindre</button>
+    </nav>
   </article>
 </template>
 
-<style scoped></style>
+<style scoped>
+article {
+  margin: 0 auto auto;
+  width: 100%;
+}
+</style>

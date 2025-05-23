@@ -15,7 +15,7 @@ const modalMessage = ref<{
   message: 'Avant de pouvoir postuler tu dois prouver ton niveau dans une partie de blitz.<br>Et comme on est sympa on te laisse commencer.<br><br>GL HF!',
   cta: 'commencer',
 })
-const onModalCloseAction = ref<(() => void) | undefined>(start)
+const onModalCloseAction = ref<(() => void)>(() => start(false))
 const restTime = ref(-1)
 
 watch(restTime, (restTime) => {
@@ -37,7 +37,7 @@ playChess.onIllegalMove = () => {
     message: 'Concentre toi un peu et rejoue le coup.',
     cta: 'ok',
   }
-  onModalCloseAction.value = undefined
+  onModalCloseAction.value = () => 0
 }
 
 playChess.onDraw = () => {
@@ -66,22 +66,25 @@ playChess.onWin = () => {
   }
   onModalCloseAction.value = start
 }
+
 playChess.onCheck = () => {
   modalMessage.value = {
     title: 'Échec au roi',
     message: '',
     cta: 'ok',
   }
-  onModalCloseAction.value = undefined
+  onModalCloseAction.value = () => 0
 }
 
 onUnmounted(() => {
   playChess.dispose()
 })
 
-function start() {
+function start(force=true) {
+  if (force) {
+    playChess.restart()
+  }
   restTime.value = 10 * 60
-  playChess.restart.bind(playChess)
   updateTime()
 }
 
@@ -93,21 +96,35 @@ function updateTime() {
     updateTime()
   }, 1000)
 }
+
+function action() {
+  modalMessage.value = undefined;
+  onModalCloseAction.value();
+}
 </script>
 
 <template>
   <article>
-    <button @click="$emit('goto', 'home')">Return</button><br>
+    <nav class="back">
+      <button @click="$emit('goto', 'home')">
+        < revenir </button>
+    </nav>
     <div class="time">{{ displayTime }}</div>
-    <Modal :data="modalMessage" @close="modalMessage = undefined; onModalCloseAction?.()"></Modal>
+    <Modal :data="modalMessage" @close="action"></Modal>
   </article>
 </template>
 
 <style scoped>
+article {
+  width: 100%;
+  flex: 1;
+}
+
 .time {
-  position: absolute;
+  position: fixed;
   top: 2rem;
   right: 2rem;
+
   font-variant-numeric: tabular-nums lining-nums;
   text-align: left;
   width: 3em;

@@ -64,7 +64,7 @@ watch(page, page => {
     </Transition>
 
     <footer>
-      <button @click="page = 'credits'">crédits</button>
+      <button @click="page = 'credits'">Crédits Alan & Damien</button>
     </footer>
 
   </main>
@@ -81,20 +81,39 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 5rem;
+  align-items: center;
+  padding: 3rem;
   box-sizing: border-box;
   pointer-events: none;
 }
 
 header {
   position: relative;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+p {
+  margin: 0;
 }
 
 footer {
   width: 100%;
   position: relative;
   text-align: center;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+}
+
+button:hover {
+  text-decoration: underline;
 }
 
 .page-enter-from,

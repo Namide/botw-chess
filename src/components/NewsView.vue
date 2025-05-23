@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+import GlassBox from './GlassBox.vue';
 
 const newsID = ref(-1)
 const emits = defineEmits<{
@@ -74,33 +75,34 @@ watch(newsID, (id) => {
 
 <template>
   <article>
-    <div>
-      <button @click="$emit('goto', 'home')">Return</button><br><br>
-      <button @click="newsID--" :disabled="newsID < 1">Actu précédente</button><br>
+    <nav class="back">
+      <button @click="$emit('goto', 'home')">
+        < revenir</button>
+    </nav>
+
+    <div class="nav">
+      <button @click="newsID--" :disabled="newsID < 1">Actu précédente</button>
       <button @click="newsID++" :disabled="newsID > 1">Actu suivante</button>
     </div>
 
     <div class="news-container">
       <Transition name="news" mode="out-in">
-        <section v-if="newsID === 0" class="news-1">
-          <h2>Tokyo, le 21 mai 2025</h2>
+        <GlassBox v-if="newsID === 0" :data="{ title: 'Tokyo, le 21 mai 2025' }" class="news-1">
           <p>Nous continuons de faire parler de nous dans le monde des échecs en ligne ! C'est cette fois notre champion
             H4ker35 qui remporte le tournoi de bullet "Champions Chess Tour" au Japon en imposant une variante peu
             commune
             de la défense sicilienne.</p>
-        </section>
-        <section v-else-if="newsID === 1" class="news-2">
-          <h2>Séoul, le 10 avril 2025</h2>
+        </GlassBox>
+        <GlassBox v-else-if="newsID === 1" :data="{ title: 'Séoul, le 10 avril 2025' }" class="news-2">
           <p>Après une série de victoires impressionnantes, notre espoir féminin M0t0k0 a utilisé un clouage pour mettre
             le champion du monde hors course. Ce coup magistral lui octroie l'une des neuf places disponibles pour la
             richement dotée
             Coupe du Monde d'e-sport de cet été !</p>
-        </section>
-        <section v-else-if="newsID === 2" class="news-3">
-          <h2>Online, le 23 mars 2025</h2>
+        </GlassBox>
+        <GlassBox v-else-if="newsID === 2" :data="{ title: 'Online, le 23 mars 2025' }" class="news-3">
           <p>En demi finale du "Chess LPL split", sur une ouverture classique, H4ker35 a rapidement transformé la partie
             en un jeu tactique complexe pour finalement placer une déviation qui lui permettra de s'imposer !</p>
-        </section>
+        </GlassBox>
       </Transition>
     </div>
   </article>
@@ -108,74 +110,41 @@ watch(newsID, (id) => {
 
 <style scoped lang="scss">
 article {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
+  // display: flex;
+  // align-items: center;
+  // gap: 2rem;
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .news-container {
   --prespective: 1000px;
 
-  width: 75%;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   perspective: var(--prespective);
   perspective-origin: center center;
 }
 
-section {
-  box-sizing: border-box;
-  line-height: 1.6;
-  max-width: 720px;
-  margin: 0 auto;
-
-  // transform-origin: center center;
-  transform-style: preserve-3d;
-  perspective: var(--prespective);
-}
-
-section:before {
-  --padding: 2rem;
-  content: "";
-  display: block;
-  position: absolute;
-  top: calc(-1 * var(--padding));
-  left: calc(-1 * var(--padding));
-  width: calc(100% + 2 * var(--padding));
-  height: calc(100% + 2 * var(--padding));
-
-  background-color: #00000050;
-  backdrop-filter: blur(16px);
-  border-radius: 2rem;
-  border: 2px solid #FFFFFF10;
-}
-
-h2 {
-  color: #FFFFFF;
-  font-size: 2.4rem;
-  margin: 0;
-  transform: translateZ(40px);
-}
-
-p {
-  color: #FFFFFF;
-  margin: 0;
-  opacity: 1;
-  transform: translateZ(20px);
-}
-
 .news-1 {
-  margin: 0 0 0 auto;
-  transform: translateY(75%) rotate3d(0.5, -1, 0, 15deg);
+  margin: 0 4rem auto auto;
+  transform: rotate3d(-0.5, -1, 0, 15deg);
 }
 
 .news-2 {
-  margin: 0 0 0 auto;
-  transform: translateY(-100%) rotate3d(-0.5, -1, 0, 15deg);
+  margin: 4rem auto auto 4rem;
+  transform: rotate3d(-0.5, 1, 0, 15deg);
 }
 
 .news-3 {
-  margin: 0 auto 0 0;
-  transform: translateY(100%) rotate3d(1, 1, 0, 15deg);
+  margin: auto auto auto 4rem;
+  transform: rotate3d(1, 1, 0, 15deg);
 }
 
 .news-enter-from,

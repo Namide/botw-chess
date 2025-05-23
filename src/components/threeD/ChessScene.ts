@@ -310,6 +310,7 @@ export class ChessScene extends RenderScene {
         .onUpdate(([darkness]) => {
           this.shadows.darkness = darkness;
         }),
+      "camera",
       () => {
         this.addTween(
           new Tween([0], false)
@@ -319,6 +320,7 @@ export class ChessScene extends RenderScene {
             .onUpdate(([darkness]) => {
               this.shadows.darkness = darkness;
             }),
+          "camera",
           () => {}
         );
       }
@@ -390,6 +392,7 @@ export class ChessScene extends RenderScene {
             this.maxblur = maxblur;
           }
         ),
+      "camera",
       () => (this.controls.enabled = enabled)
     );
   }
@@ -472,6 +475,7 @@ export class ChessScene extends RenderScene {
           piece.position.set(x, y, z);
           piece.rotation.set(rx, ry, rz);
         }),
+      "piece",
       () => {
         if (position) {
           piece.visible = true;
@@ -501,7 +505,8 @@ export class ChessScene extends RenderScene {
               .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
                 piece.position.set(x, y, z);
                 piece.rotation.set(rx, ry, rz);
-              })
+              }),
+            "piece"
           );
         } else {
           piece.rotation.set(
@@ -543,7 +548,8 @@ export class ChessScene extends RenderScene {
         .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
           piece.position.set(x, y, z);
           piece.rotation.set(rx, ry, rz);
-        })
+        }),
+      "piece"
     );
   }
 
@@ -588,11 +594,11 @@ export class ChessScene extends RenderScene {
   //   return pieces[0].piece;
   // }
 
-  capturePieceByPosition(square: Square, type: string, delay = 400) {
+  capturePieceByPosition(square: Square, pieceSensitive: string, delay = 400) {
     const ROT_MAX = 5;
     const DIST = 20;
     const duration = 1000;
-    const piece = this.getPiece(square, type);
+    const piece = this.getPiece(square, pieceSensitive);
     const ELEVATION = 8;
 
     const POSITION_START = piece.position;
@@ -626,6 +632,7 @@ export class ChessScene extends RenderScene {
           );
           piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
         }),
+      "piece",
       () => {
         this.addTween(
           new Tween([...POSITION_MIDDLE.toArray(), ROT_MAX / 2], false)
@@ -643,6 +650,7 @@ export class ChessScene extends RenderScene {
               );
               piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
             }),
+          "piece",
           () => {
             piece.visible = false;
           }
@@ -651,7 +659,7 @@ export class ChessScene extends RenderScene {
     );
   }
 
-  getPiece(square: Square, type: string) {
+  getPiece(square: Square, typeCaseSensitive: string) {
     const allPieces = piecesNames
       .map((name) => this.meshes![name])
       .filter((piece) => piece.visible)
@@ -661,7 +669,9 @@ export class ChessScene extends RenderScene {
       }));
 
     return allPieces.find(
-      (piece) => piece.square === square && piece.piece.name.indexOf(type) > -1
+      (piece) =>
+        piece.square === square &&
+        piece.piece.name.indexOf(typeCaseSensitive) > -1
     )!.piece;
   }
 
@@ -690,6 +700,7 @@ export class ChessScene extends RenderScene {
           piece.position.set(x, y, z);
           piece.rotation.set(rx, ry, rz);
         }),
+      "piece",
       () => {
         const { x, y, z } = toXYZ;
         this.addTween(
@@ -707,14 +718,20 @@ export class ChessScene extends RenderScene {
             .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
               piece.position.set(x, y, z);
               piece.rotation.set(rx, ry, rz);
-            })
+            }),
+          "piece"
         );
       }
     );
   }
 
-  playPieceBySquare(from: Square, to: Square, type: string, duration = 450) {
-    const piece = this.getPiece(from, type);
+  playPieceBySquare(
+    from: Square,
+    to: Square,
+    pieceSensitive: string,
+    duration = 450
+  ) {
+    const piece = this.getPiece(from, pieceSensitive);
     const toXYZ = this.squareToXYZ(to);
     this.playPiece(piece, toXYZ, duration);
   }
@@ -726,7 +743,8 @@ export class ChessScene extends RenderScene {
         .easing(Easing.Quadratic.In)
         .onUpdate(([y]: number[]) => {
           piece.position.y = y;
-        })
+        }),
+      "piece"
     );
 
     return this.threeDPositionToChessPosition(piece.position);

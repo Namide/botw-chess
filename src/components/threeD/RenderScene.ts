@@ -40,7 +40,7 @@ export class RenderScene {
   controls;
   clock;
   composer;
-  tweens: Tween<any>[] = [];
+  tweens: { type: "camera" | "piece" | "other"; tween: Tween<any> }[] = [];
   disposeList: (() => void)[] = [];
   bokehPass: BokehPass;
   onReady;
@@ -294,16 +294,24 @@ export class RenderScene {
   }
 
   removeTween(tween: Tween<any>) {
-    const i = this.tweens.indexOf(tween);
+    const i = this.tweens.findIndex(data => data.tween === tween);
     this.tweens.splice(i, 0);
   }
 
-  addTween(tween: Tween<any>, onComplete?: () => void) {
-    this.tweens.push(tween);
-    tween.onComplete(() => {
-      const i = this.tweens.indexOf(tween);
-      this.tweens.splice(i, 0);
+  cleanTweens(type: 'camera' | 'piece' | 'other') {
+    for (const { tween } of this.tweens.filter(data => data.type === type)) {
+      this.removeTween(tween)
+    }
+  }
 
+  addTween(
+    tween: Tween<any>,
+    type: "camera" | "piece" | "other",
+    onComplete?: () => void
+  ) {
+    this.tweens.push({ type, tween });
+    tween.onComplete(() => {
+      this.removeTween(tween)
       if (onComplete) {
         onComplete();
       }
@@ -315,7 +323,7 @@ export class RenderScene {
     stats?.begin();
 
     for (let i = this.tweens.length - 1; i >= 0; i--) {
-      this.tweens[i].update();
+      this.tweens[i].tween.update();
     }
 
     this.shadows.tick({
