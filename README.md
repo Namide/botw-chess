@@ -12,3 +12,6 @@ Practical chess endgames (for training): https://docs.google.com/spreadsheets/d/
 
 IA: https://github.com/nmrugg/stockfish.js
 Tuto: https://stackoverflow.com/questions/77194959/how-to-integrate-stockfish-in-html-with-chess-js-and-chessboard-js
+
+Positions: https://www.chess.com/fr/games/view/17398009
+

@@ -1,18 +1,20 @@
-export const DEBUG = window.location.href.indexOf('/debug') > -1
+export const DEBUG = window.location.href.indexOf("/debug") > -1;
 
 export const START_CAMERA = {
-  "cameraPosition": {
-    "x": 7.939014769432104,
-    "y": 7.246285232188773,
-    "z": 19.047736928002937
+  cameraPosition: {
+    x: 1.1756337566888895,
+    y: 2.8958180682869568,
+    z: 18.09526382806227,
   },
-  "targetPosition": {
-    "x": -0.098305149286082,
-    "y": 0.397752145803926,
-    "z": -1.0824172732513935
+  targetPosition: {
+    x: 0.9692201953718734,
+    y: 3.22972687934564,
+    z: -1.510983047656019,
   },
-  "focus": 20,
-  aperture: 0.005,
+  focus: 17,
+  aperture: 0.002,
   maxblur: 0.01,
-}
-export const START_POSITIONS = '2r5/3r4/p3k1b1/1p1pp1pp/8/1PP1NPP1/PK1R2P1/4R3 b - - 0 26'
+};
+
+export const START_POSITIONS =
+  "2r5/3r4/p3k1b1/1p1pp1pp/8/1PP1NPP1/PK1R2P1/4R3 b - - 0 26";

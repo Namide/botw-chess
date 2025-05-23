@@ -22,6 +22,7 @@ import {
 import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import GameStats from "gamestats.js";
 import { DEBUG, START_CAMERA } from "../../conf";
+import { Shadows } from "./Shadows";
 
 let stats: GameStats;
 
@@ -43,6 +44,7 @@ export class RenderScene {
   disposeList: (() => void)[] = [];
   bokehPass: BokehPass;
   onReady;
+  shadows;
 
   hq;
 
@@ -110,6 +112,16 @@ export class RenderScene {
     this.focus = START_CAMERA.focus;
     this.aperture = START_CAMERA.aperture;
     this.maxblur = START_CAMERA.maxblur;
+
+    this.shadows = new Shadows({
+      blur: 1,
+      darkness: 20,
+      opacity: 0.5,
+      cameraHeight: 20,
+      width: 22.8,
+      height: 22.8,
+    });
+    this.scene.add(this.shadows);
 
     window.addEventListener("resize", this.onWindowResize);
 
@@ -199,6 +211,11 @@ export class RenderScene {
       composer.addPass(smaaPass);
     }
 
+    // const saoPass = new SAOPass(this.scene, this.camera);
+    // saoPass.params.saoKernelRadius = 25;
+    // saoPass.params.saoIntensity = 0.005;
+
+    // composer.addPass(saoPass);
     composer.addPass(bokehPass);
     composer.addPass(bloomPass);
     composer.addPass(effectFilm);
@@ -212,6 +229,45 @@ export class RenderScene {
 
     return { composer, bokehPass };
   }
+
+  // initShadow() {
+  //   const light1 = new DirectionalLight(0xffffff, 1);
+  //   light1.position.set(10, 10, 10);
+  //   // light1.lookAt(new Vector3())
+
+  //   const screenPixels = window.screen.height * window.screen.width;
+  //   const size = 2 ** Math.round(Math.log2(Math.sqrt(screenPixels)));
+
+  //   console.log(
+  //     `%cShadow map size %c${size}x${size}`,
+  //     "color:#F70",
+  //     "color:#07F"
+  //   );
+
+  //   // light1.shadow.normalBias = 0.05
+
+  //   light1.shadow.bias = -0.0014 * (1024 / size);
+  //   light1.castShadow = true;
+
+  //   // light1.shadow.radius = 3;
+  //   // light1.shadow.blurSamples = 5
+
+  //   light1.shadow.mapSize.width = size;
+  //   light1.shadow.mapSize.height = size;
+
+  //   light1.shadow.camera.far = 15;
+  //   light1.shadow.camera.near = 1;
+  //   light1.shadow.camera.top = 15;
+  //   light1.shadow.camera.bottom = -15;
+  //   light1.shadow.camera.left = 15;
+  //   light1.shadow.camera.right = -15;
+
+  //   this.scene.add(light1);
+
+  //   if (DEBUG) {
+  //     this.scene.add(new CameraHelper(light1.shadow.camera));
+  //   }
+  // }
 
   get focus() {
     return (this.bokehPass.uniforms as any).focus.value;
@@ -257,9 +313,15 @@ export class RenderScene {
 
   tick() {
     stats?.begin();
+
     for (let i = this.tweens.length - 1; i >= 0; i--) {
       this.tweens[i].update();
     }
+
+    this.shadows.tick({
+      scene: this.scene,
+      renderer: this.renderer,
+    });
 
     this.render();
 

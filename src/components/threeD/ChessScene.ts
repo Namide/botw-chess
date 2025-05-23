@@ -1,20 +1,24 @@
 import {
   BufferGeometry,
   EquirectangularReflectionMapping,
+  Euler,
   Light,
   Material,
   Mesh,
   NoColorSpace,
+  Quaternion,
   TextureLoader,
+  Vector3,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import botwChessSrc from "../../assets/botw-chess-008.glb?url";
+import botwChessSrc from "../../assets/botw-chess-009.glb?url";
 import environmentMapSrc from "../../assets/bg-3d.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
 import { RenderScene } from "./RenderScene";
 import { lerp } from "three/src/math/MathUtils.js";
 import { DEBUG, START_CAMERA, START_POSITIONS } from "../../conf";
+import type { Square } from "chess.js";
 
 const CLEAR_BOARD_DURATION = 2000;
 
@@ -109,6 +113,25 @@ export class ChessScene extends RenderScene {
 
     Promise.all([this.loadBackground(), this.loadModel()]).then(() => {
       this.start();
+
+      // this.moveCamera(
+      //   {
+      //     cameraPosition: {
+      //       x: 1.1756337566888895,
+      //       y: 2.8958180682869568,
+      //       z: 18.09526382806227,
+      //     },
+      //     targetPosition: {
+      //       x: 0.9692201953718734,
+      //       y: 3.22972687934564,
+      //       z: -1.510983047656019,
+      //     },
+      //     focus: 17,
+      //     aperture: 0.002,
+      //     maxblur: 0.01,
+      //   },
+      //   { duration: 5000, easing: Easing.Exponential.Out }
+      // );
     });
 
     // Model
@@ -128,6 +151,13 @@ export class ChessScene extends RenderScene {
             child.parent?.remove(child);
           } else {
             (meshes as any)[child.name] = child;
+
+            // if (piecesNames.indexOf(child.name as any) > 0) {
+            //   child.castShadow = true
+            //   child.receiveShadow = true
+            // } else {
+            //   child.receiveShadow = true
+            // }
           }
         }
 
@@ -163,7 +193,7 @@ export class ChessScene extends RenderScene {
           })
         );
 
-        this.moveCamera(START_CAMERA, 0);
+        this.moveCamera(START_CAMERA, { duration: 0 });
         this.reset(START_POSITIONS, 0);
 
         // const meshTemp = new Mesh(
@@ -252,7 +282,13 @@ export class ChessScene extends RenderScene {
       aperture?: number;
       maxblur?: number;
     } = {},
-    duration = CLEAR_BOARD_DURATION
+    {
+      duration = CLEAR_BOARD_DURATION,
+      easing = Easing.Exponential.InOut,
+    }: {
+      duration?: number;
+      easing?: typeof Easing.Exponential.InOut;
+    } = {}
   ) {
     const enabled = this.controls.enabled;
     this.controls.enabled = false;
@@ -264,6 +300,28 @@ export class ChessScene extends RenderScene {
     const startDist = Math.sqrt(
       (this.camera.position.z - this.controls.target.z) ** 2 +
         (this.camera.position.x - this.controls.target.x) ** 2
+    );
+
+    // shadows
+    this.addTween(
+      new Tween([20], false)
+        .to([0], duration / 4)
+        .easing(easing)
+        .onUpdate(([darkness]) => {
+          this.shadows.darkness = darkness;
+        }),
+      () => {
+        this.addTween(
+          new Tween([0], false)
+            .to([20], duration / 4)
+            .delay(duration / 2)
+            .easing(easing)
+            .onUpdate(([darkness]) => {
+              this.shadows.darkness = darkness;
+            }),
+          () => {}
+        );
+      }
     );
 
     this.addTween(
@@ -306,7 +364,7 @@ export class ChessScene extends RenderScene {
           })(),
           duration
         )
-        .easing(Easing.Exponential.InOut)
+        .easing(easing)
         .onUpdate(
           ([
             rads,
@@ -339,6 +397,7 @@ export class ChessScene extends RenderScene {
   reset(positions: string, duration = CLEAR_BOARD_DURATION) {
     const positionnedPieces: {
       position: { x: number; y: number; z: number };
+      // square: Square;
       mesh: Mesh;
     }[] = [];
 
@@ -357,8 +416,10 @@ export class ChessScene extends RenderScene {
               !positionnedPieces.find(({ mesh }) => mesh.name === pieceName)
           ) as PieceName;
           const mesh = this.meshes![pieceName];
+          const square = `${"abcdefgh"[columnIndex]}${8 - rowIndex}` as Square;
           positionnedPieces.push({
-            position: this.meshesPositions[rowIndex][columnIndex],
+            position: this.squareToXYZ(square),
+            // square: 'abcdefgh'[columnIndex] + (columnIndex + 1) as Square,
             mesh,
           });
           columnIndex++;
@@ -397,7 +458,7 @@ export class ChessScene extends RenderScene {
         .to(
           [
             piece.position.x,
-            piece.position.y + 10,
+            piece.position.y + 30,
             piece.position.z,
             piece.userData.rot[0] + Math.PI * Math.random() - Math.PI / 2,
             piece.userData.rot[1] + Math.PI * Math.random() - Math.PI / 2,
@@ -500,21 +561,21 @@ export class ChessScene extends RenderScene {
       )
       .flat(2);
     boardPositions.sort((a, b) => a.distance - b.distance);
-    return this.ijToChessPosition(boardPositions[0].i, boardPositions[0].j);
+    return this.ijToSquare(boardPositions[0].i, boardPositions[0].j);
   }
 
-  ijToChessPosition(i: number, j: number) {
-    return "abcdefgh".charAt(7 - j) + (8 - i);
+  ijToSquare(i: number, j: number) {
+    return ("abcdefgh"[7 - j] + (8 - i)) as Square;
   }
 
-  chessPositionToXYZ(position: string) {
+  squareToXYZ(position: Square) {
     const j = "hgfedcba".indexOf(position[0]);
     const i = 8 - Number(position[1]);
     return this.meshesPositions[i][j];
   }
 
   // chessPositionToPiece(position: string) {
-  //   const xyz = this.chessPositionToXYZ(position);
+  //   const xyz = this.squareToXYZ(position);
   //   const pieces = piecesNames
   //     .map((name) => this.meshes![name])
   //     .map((piece) => ({
@@ -527,53 +588,88 @@ export class ChessScene extends RenderScene {
   //   return pieces[0].piece;
   // }
 
-  eatPiece(piece: Mesh, duration = 210) {
-    const ROT = Math.PI * 10;
+  capturePieceByPosition(square: Square, type: string, delay = 400) {
+    const ROT_MAX = 5;
     const DIST = 20;
+    const duration = 1000;
+    const piece = this.getPiece(square, type);
+    const ELEVATION = 8;
+
+    const POSITION_START = piece.position;
+    const POSITION_END = {
+      x: Math.random() * 2 * DIST - DIST,
+      y: -8,
+      z: Math.sign(Math.random() - 0.5) * DIST,
+    };
+    const POSITION_MIDDLE = POSITION_START.clone().lerp(
+      new Vector3(POSITION_END.x, 0, POSITION_END.z),
+      0.5
+    );
+    POSITION_MIDDLE.y = ELEVATION;
+
+    const QUATERNION_START = new Quaternion().setFromEuler(piece.rotation);
+    const QUATERNION_END = new Quaternion().setFromEuler(
+      new Euler(Math.random(), Math.random(), Math.random())
+    );
 
     this.addTween(
-      new Tween([...piece.position.toArray(), ...piece.userData.rot], false)
-        .to(
-          [
-            piece.position.x + Math.random() * DIST - DIST / 2,
-            piece.position.y + 10,
-            piece.position.z + Math.random() * DIST - DIST / 2,
-            piece.userData.rot[0] + ROT * Math.random() - ROT / 2,
-            piece.userData.rot[1] + ROT * Math.random() - ROT / 2,
-            piece.userData.rot[2] + ROT * Math.random() - ROT / 2,
-          ],
-          duration
-        )
-        .easing(Easing.Exponential.Out)
-        .onUpdate(([x, y, z, rx, ry, rz]: number[]) => {
+      new Tween([...POSITION_START.toArray(), 0], false)
+        .to([...POSITION_MIDDLE.toArray(), ROT_MAX / 2], duration / 2)
+        .delay(delay)
+        .easing(Easing.Linear.None)
+        .onUpdate(([x, y, z, r]: number[]) => {
           piece.position.set(x, y, z);
-          piece.rotation.set(rx, ry, rz);
+          const quat = new Quaternion().slerpQuaternions(
+            QUATERNION_START,
+            QUATERNION_END,
+            r
+          );
+          piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
         }),
       () => {
-        piece.visible = false;
+        this.addTween(
+          new Tween([...POSITION_MIDDLE.toArray(), ROT_MAX / 2], false)
+            .to(
+              [POSITION_END.x, POSITION_END.y, POSITION_END.z, ROT_MAX],
+              duration / 2
+            )
+            .easing(Easing.Quadratic.Out)
+            .onUpdate(([x, y, z, r]: number[]) => {
+              piece.position.set(x, y, z);
+              const quat = new Quaternion().slerpQuaternions(
+                QUATERNION_START,
+                QUATERNION_END,
+                r
+              );
+              piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+            }),
+          () => {
+            piece.visible = false;
+          }
+        );
       }
     );
   }
 
-  playPieceByPosition(from: string, to: string, duration = 450) {
+  getPiece(square: Square, type: string) {
     const allPieces = piecesNames
       .map((name) => this.meshes![name])
       .filter((piece) => piece.visible)
       .map((piece) => ({
         piece,
-        position: this.threeDPositionToChessPosition(piece.position),
+        square: this.threeDPositionToChessPosition(piece.position),
       }));
 
-    const piece = allPieces.find((piece) => piece.position === from)!.piece;
-    const toXYZ = this.chessPositionToXYZ(to);
+    return allPieces.find(
+      (piece) => piece.square === square && piece.piece.name.indexOf(type) > -1
+    )!.piece;
+  }
 
-    const eat = allPieces.find((piece) => piece.position === to);
-    if (eat) {
-      this.eatPiece(eat.piece);
-    }
-
-    console.log("🎮", from, to, piece.name, toXYZ);
-
+  playPiece(
+    piece: Mesh,
+    toXYZ: { x: number; y: number; z: number },
+    duration = 450
+  ) {
     const ROT = Math.PI / 4;
 
     this.addTween(
@@ -615,6 +711,12 @@ export class ChessScene extends RenderScene {
         );
       }
     );
+  }
+
+  playPieceBySquare(from: Square, to: Square, type: string, duration = 450) {
+    const piece = this.getPiece(from, type);
+    const toXYZ = this.squareToXYZ(to);
+    this.playPiece(piece, toXYZ, duration);
   }
 
   dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {

@@ -1,14 +1,14 @@
-import stokfishSrc from "stockfish.js/stockfish.wasm.js?url";
 import { ChessScene } from "./ChessScene";
 import { DragControls } from "three/examples/jsm/Addons.js";
 import type { BufferGeometry, Event, Material, Mesh, Object3D } from "three";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
-import { Chess } from "chess.js";
+import { Chess, type Color, type PieceSymbol, type Square } from "chess.js";
 
 // stockfish-nnue-17-lite.js
 // stockfish-nnue-17-lite.wasm
 
-const PLAYER_COLOR = "white";
+const stockfishSrc = "/stockfish.js/stockfish.wasm.js";
+const PLAYER_COLOR: Color = "w";
 
 // https://github.com/nmrugg/stockfish.js/blob/master/examples/enginegame.js
 export class PlayChess {
@@ -25,15 +25,21 @@ export class PlayChess {
 
   game;
 
-  dragFrom?: string;
+  dragFrom?: Square;
+
+  onIllegalMove?: () => void;
+  onDraw?: () => void;
+  onLose?: () => void;
+  onWin?: () => void;
+  onCheck?: () => void;
 
   // https://official-stockfish.github.io/docs/stockfish-wiki/UCI-&-Commands.html
   constructor() {
     this.chessScene = ChessScene.instance;
 
     this.game = new Chess();
-    this.engine = new Worker(stokfishSrc);
-    this.evaler = new Worker(stokfishSrc);
+    this.engine = new Worker(stockfishSrc);
+    this.evaler = new Worker(stockfishSrc);
 
     this.onEngineMessage = this.onEngineMessage.bind(this);
     this.engine.addEventListener("message", this.onEngineMessage);
@@ -42,36 +48,16 @@ export class PlayChess {
     this.onEvalerMessage = this.onEvalerMessage.bind(this);
     this.evaler.addEventListener("message", this.onEvalerMessage);
 
-    this.chessScene.reset(
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    );
-    this.chessScene.moveCamera({
-      cameraPosition: {
-        x: 5,
-        y: 29.5,
-        z: 0,
-      },
-      targetPosition: {
-        x: 0.5,
-        y: 0,
-        z: 0,
-      },
-      focus: 28,
-      aperture: 0.001,
-      maxblur: 0.01,
-    });
-
     this.controls = this.initControls();
 
     this.engineCmd("uci");
 
     this.start();
+    this.restart();
   }
 
   onEvalerMessage(event: MessageEvent<any>) {
     const line = event.data;
-
-    console.log("evaler:", line);
 
     /// Ignore some output.
     if (
@@ -88,9 +74,69 @@ export class PlayChess {
     // evaluation_el.textContent += line;
   }
 
+  movePiece(move: { from: Square; to: Square; promotion?: PieceSymbol }) {
+    const isPlayerTurn = this.game.turn() === PLAYER_COLOR;
+    const detail = this.game.move(move);
+
+    if (!isPlayerTurn) {
+      this.chessScene.playPieceBySquare(detail.from, detail.to, detail.piece);
+    }
+
+    if (detail.isCapture()) {
+      // const colorCaptured: Color = isPlayerTurn ? 'b' : 'w'
+      // const count = this.game.history({ verbose: true }).reduce((total, move) => {
+      //   if (move.isCapture() && move.color === colorCaptured) {
+      //     return total + 1
+      //   }
+      //   return total
+      // }, 0)
+
+      this.chessScene.capturePieceByPosition(
+        move.to,
+        isPlayerTurn ? detail.captured! : detail.captured!.toUpperCase(),
+        isPlayerTurn ? 0 : 400
+      );
+    }
+
+    // isKingsideCastle() isQueensideCastle()
+    if (detail.piece === "k") {
+      if (detail.to === "g1" && detail.from === "e1") {
+        this.chessScene.playPieceBySquare("h1", "f1", detail.piece);
+      }
+
+      if (detail.to === "c1" && detail.from === "e1") {
+        this.chessScene.playPieceBySquare("a1", "d1", detail.piece);
+      }
+
+      if (detail.to === "g8" && detail.from === "e8") {
+        this.chessScene.playPieceBySquare("h8", "f8", detail.piece);
+      }
+
+      if (detail.to === "c8" && detail.from === "e8") {
+        this.chessScene.playPieceBySquare("a8", "d8", detail.piece);
+      }
+    }
+
+    /*
+
+    isPromotion() {
+      return this.flags.indexOf(FLAGS['PROMOTION']) > -1
+    }
+
+    isEnPassant() {
+      return this.flags.indexOf(FLAGS['EP_CAPTURE']) > -1
+    }
+
+    isBigPawn() {
+      return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1
+    }
+    */
+
+    this.prepareMove();
+  }
+
   onEngineMessage(event: MessageEvent<any>) {
     const line = event.data;
-    console.log("engine:", line);
 
     // var line;
 
@@ -110,21 +156,15 @@ export class PlayChess {
 
       /// Did the AI move?
       if (match) {
-        console.log(
-          "🎮 move from:",
-          match[1],
-          "to:",
-          match[2],
-          "promotion:",
-          match[3]
-        );
-        this.game.move({ from: match[1], to: match[2], promotion: match[3] });
-        this.prepareMove();
+        this.movePiece({ from: match[1], to: match[2], promotion: match[3] });
+        // this.game.move({ from: match[1], to: match[2], promotion: match[3] });
+
+        // this.prepareMove();
         this.evalerCmd("eval");
 
-        this.chessScene.playPieceByPosition(match[1], match[2])
+        // this.chessScene.playPieceBySquare(match[1], match[2]);
 
-        console.log(this.game.ascii())
+        // console.log(this.game.ascii());
 
         // evaluation_el.textContent = "";
       } else if ((match = line.match(/^info .*\bdepth (\d+) .*\bnps (\d+)/))) {
@@ -171,9 +211,25 @@ export class PlayChess {
     // $('#pgn').text(game.pgn());
     // board.position(game.fen());
     // updateClock();
-    var turn = this.game.turn() === "w" ? "white" : "black";
+
+    if (this.game.isCheck() && this.game.turn() === PLAYER_COLOR) {
+      this.onCheck?.();
+    }
+
+    if (this.game.isCheckmate() && this.game.turn() === PLAYER_COLOR) {
+      this.onLose?.();
+    }
+
+    if (this.game.isCheckmate() && this.game.turn() !== PLAYER_COLOR) {
+      this.onWin?.();
+    }
+
+    if (this.game.isDraw() || this.game.isStalemate()) {
+      this.onDraw?.();
+    }
+
     if (!this.game.isGameOver()) {
-      if (turn !== PLAYER_COLOR) {
+      if (this.game.turn() !== PLAYER_COLOR) {
         this.engineCmd("position startpos moves" + this.getMoves());
         this.evalerCmd("position startpos moves" + this.getMoves());
         // evaluation_el.textContent = "";
@@ -221,6 +277,28 @@ export class PlayChess {
     this.prepareMove();
 
     // ('position startpos moves' + getMoves())
+  }
+
+  restart() {
+    this.game.reset();
+    this.chessScene.reset(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    );
+    this.chessScene.moveCamera({
+      cameraPosition: {
+        x: 5,
+        y: 29.5,
+        z: 0,
+      },
+      targetPosition: {
+        x: 0.5,
+        y: 0,
+        z: 0,
+      },
+      focus: 28,
+      aperture: 0.001,
+      maxblur: 0.01,
+    });
   }
 
   initControls() {
@@ -307,21 +385,32 @@ export class PlayChess {
       event.object as Mesh<BufferGeometry, Material>
     );
 
-    console.log("FROM TO:", this.dragFrom, dragTo);
-
     if (this.dragFrom !== dragTo) {
-      const move = this.game.move({
-        from: this.dragFrom!,
-        to: dragTo,
-        // promotion: document.getElementById("promote").value
-      });
+      try {
+        this.movePiece({
+          from: this.dragFrom!,
+          to: dragTo,
+          promotion:
+            event.object.name[0].toLowerCase() === "p" &&
+            Number(dragTo[1]) === 8
+              ? "q"
+              : undefined,
+          // promotion: document.getElementById("promote").value
+        });
 
-      if (move !== null) {
-        this.prepareMove();
-      } else {
-        // illegal move
-        console.log("❌ illegal move");
-        alert("illegal move");
+        // const move = this.game.move({
+        //   from: this.dragFrom!,
+        //   to: dragTo,
+        //   // promotion: document.getElementById("promote").value
+        // });
+        // this.prepareMove();
+      } catch (error) {
+        this.onIllegalMove?.();
+
+        this.chessScene.playPiece(
+          event.object as Mesh,
+          this.chessScene.squareToXYZ(this.dragFrom!)
+        );
       }
     }
 

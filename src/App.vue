@@ -5,23 +5,43 @@ import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';
 import JoinView from './components/JoinView.vue';
 import { START_CAMERA, START_POSITIONS } from './conf';
+import { ChessScene } from './components/threeD/ChessScene';
+import CreditsView from './components/CreditsView.vue';
 
 const position = ref<string | undefined>(undefined)
 const random = ref(1)
 const camera = ref('')
 
-const page = ref<'home' | 'news' | 'join'>('home')
+const page = ref<'home' | 'news' | 'join' | 'credits'>('home')
 
 watch(page, page => {
   switch (page) {
     case 'home':
-      position.value = START_POSITIONS
-      camera.value = JSON.stringify(START_CAMERA)
+      ChessScene.instance.reset(START_POSITIONS)
+      ChessScene.instance.moveCamera(START_CAMERA)
       break
-    // case 'join':
-    //   position.value = ''
-    //   camera.value = ''
-    //   break
+    case 'credits':
+      ChessScene.instance.reset('8/3rk2p/3pb1p1/1Np1pp2/2P1P3/5P2/3bBKPP/R7 w - - 7 29')
+      ChessScene.instance.moveCamera({
+        "cameraPosition": {
+          "x": 7.4584726009576725,
+          "y": 4.61995805253401,
+          "z": 12.92355841605686
+        },
+        "targetPosition": {
+          "x": 0.3597959182553215,
+          "y": 2.6903860351731463,
+          "z": -2.3103919183359625
+        },
+        "focus": 17,
+        "aperture": 0.002,
+        "maxblur": 0.01
+      })
+      break
+    case 'join':
+      position.value = ''
+      camera.value = ''
+      break
   }
 })
 </script>
@@ -39,12 +59,12 @@ watch(page, page => {
       <NewsView v-if="page === 'news'" @goto="page = $event" @reset="position = $event" @camera="camera = $event">
       </NewsView>
       <JoinView v-else-if="page === 'join'" @goto="page = $event" @change="random++"></JoinView>
+      <CreditsView v-else-if="page === 'credits'" @goto="page = $event"></CreditsView>
       <HomeView v-else @goto="page = $event"></HomeView>
     </Transition>
 
     <footer>
-      crédits ~ <a href="https://super8studio.eu/" target="_blank">Super8Studio</a> & <a
-        href="https://damien-doussaud.com/" target="_blank">Namide</a>
+      <button @click="page = 'credits'">crédits</button>
     </footer>
 
   </main>
