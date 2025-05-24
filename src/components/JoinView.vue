@@ -52,7 +52,7 @@ playChess.onDraw = () => {
 playChess.onLose = () => {
   modalMessage.value = {
     title: 'Perdu !',
-    message: 'Il faut un meilleur niveau pour intégrer l\'équipe. Entraine toi dur et reviens nous voir.',
+    message: 'Il faut un meilleur niveau pour intégrer l\'équipe. Entraine dur et reviens nous voir.',
     cta: 'recommencer',
   }
   onModalCloseAction.value = start

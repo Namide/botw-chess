@@ -80,11 +80,6 @@ watch(newsID, (id) => {
         < revenir</button>
     </nav>
 
-    <div class="nav">
-      <button @click="newsID--" :disabled="newsID < 1">Actu précédente</button>
-      <button @click="newsID++" :disabled="newsID > 1">Actu suivante</button>
-    </div>
-
     <div class="news-container">
       <Transition name="news" mode="out-in">
         <GlassBox v-if="newsID === 0" :data="{ title: 'Tokyo, le 21 mai 2025' }" class="news-1">
@@ -104,6 +99,11 @@ watch(newsID, (id) => {
             en un jeu tactique complexe pour finalement placer une déviation qui lui permettra de s'imposer !</p>
         </GlassBox>
       </Transition>
+    </div>
+
+    <div class="nav">
+      <button @click="newsID--" :disabled="newsID < 1" class="cta">◄ actu précédente</button>
+      <button @click="newsID++" :disabled="newsID > 1" class="cta">actu suivante ►</button>
     </div>
   </article>
 </template>
@@ -133,7 +133,7 @@ article {
 }
 
 .news-1 {
-  margin: 0 4rem auto auto;
+  margin: 4rem 4rem auto auto;
   transform: rotate3d(-0.5, -1, 0, 15deg);
 }
 

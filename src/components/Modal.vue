@@ -15,7 +15,7 @@ const style = ref<any>({})
 
 watch(key, () => {
   style.value = {
-    transform: `translateY(-50%) rotate3d(${Math.random() * 2 - 1}, ${Math.random() * 2 - 1}, 0, 7deg)`
+    transform: `rotate3d(${Math.random() * 2 - 1}, ${Math.random() * 2 - 1}, 0, 7deg)`
   }
 }, { immediate: true })
 </script>
@@ -24,7 +24,7 @@ watch(key, () => {
   <Transition name="modal" :key="key" :duration="750">
     <aside v-if="key">
       <div class="bg"></div>
-      <GlassBox :data="data" :style="style" @action="$emit('close')"></GlassBox>
+      <GlassBox :data="data" :style="style" @action="$emit('close')" class="glass-box"></GlassBox>
     </aside>
   </Transition>
 </template>
@@ -40,6 +40,7 @@ aside {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 }
 
 .bg {
@@ -50,6 +51,10 @@ aside {
   height: 100%;
   background: #000000C0;
   pointer-events: all;
+}
+
+.glass-box {
+  margin-bottom: 10vh;
 }
 
 .modal-enter-from .bg,

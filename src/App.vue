@@ -39,8 +39,8 @@ watch(page, page => {
       })
       break
     case 'join':
-      position.value = ''
-      camera.value = ''
+      // position.value = ''
+      // camera.value = ''
       break
   }
 })
@@ -51,8 +51,8 @@ watch(page, page => {
   <main>
 
     <header>
-      <h1>C45 Ch3ss Club</h1>
-      <p>La team esport leader du blitz chess online</p>
+      <h1>Ultra Mat</h1>
+      <p>La team esport du blitz chess</p>
     </header>
 
     <Transition name="page" mode="out-in">
@@ -82,7 +82,7 @@ main {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 3rem;
+  padding: 1rem;
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -90,11 +90,13 @@ main {
 header {
   position: relative;
   text-align: center;
+  margin-top: 4rem;
 }
 
 h1 {
   font-size: 3rem;
   margin: 0;
+  line-height: 1;
 }
 
 p {
