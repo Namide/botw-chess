@@ -3,8 +3,8 @@
 
 <template>
   <nav>
-    <button @click="$emit('goto', 'news')" class="cta"><span>-</span> nos actus <span>-</span></button>
-    <button @click="$emit('goto', 'join')" class="cta"><span>-</span> nous rejoindre <span>-</span></button>
+    <button @click="$emit('goto', 'news')" class="link"><span>-</span> nos actus <span>-</span></button>
+    <button @click="$emit('goto', 'join')" class="link"><span>-</span> nous rejoindre <span>-</span></button>
   </nav>
 </template>
 
@@ -20,21 +20,32 @@ nav {
   justify-content: center;
 
   gap: 5vh;
-  padding-bottom: 10vh;
+  padding-bottom: 15vh;
 }
 
 button {
   font-size: 2em;
-  background: transparent;
-  border: none;
   text-shadow: 0 0 8px #fffffff0;
 
   span {
+    display: inline-block;
+    transition: transform 0.5s ease-in-out, opacity 0.25s linear;
     opacity: 0.5;
+
+    &:first-child {
+      transform-origin: right;
+    }
+
+    &:last-child {
+      transform-origin: left;
+    }
   }
 
-  &:hover span {
-    opacity: 1;
+  &:hover {
+    span {
+      transform: scaleX(2);
+      opacity: 1;
+    }
   }
 }
 </style>

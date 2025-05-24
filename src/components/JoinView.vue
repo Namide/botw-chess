@@ -2,6 +2,7 @@
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { PlayChess } from './threeD/PlayChess';
 import Modal from './Modal.vue';
+import Return from './Return.vue';
 
 const playChess = new PlayChess()
 
@@ -52,7 +53,7 @@ playChess.onDraw = () => {
 playChess.onLose = () => {
   modalMessage.value = {
     title: 'Perdu !',
-    message: 'Il faut un meilleur niveau pour intégrer l\'équipe. Entraine dur et reviens nous voir.',
+    message: 'Il faut un meilleur niveau pour intégrer l\'équipe. Entraine toi et reviens nous voir.',
     cta: 'recommencer',
   }
   onModalCloseAction.value = start
@@ -105,10 +106,7 @@ function action() {
 
 <template>
   <article>
-    <nav class="back">
-      <button @click="$emit('goto', 'home')">
-        < revenir </button>
-    </nav>
+    <Return @goto="$emit('goto', $event)"></Return>
     <div class="time">{{ displayTime }}</div>
     <Modal :data="modalMessage" @close="action"></Modal>
   </article>

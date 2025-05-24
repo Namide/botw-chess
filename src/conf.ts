@@ -11,7 +11,7 @@ export const START_CAMERA = {
     y: 3.22972687934564,
     z: -1.510983047656019,
   },
-  focus: 17,
+  focus: 12,
   aperture: 0.002,
   maxblur: 0.01,
 };

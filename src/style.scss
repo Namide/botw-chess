@@ -50,19 +50,33 @@ h2,
 h3,
 h4,
 h5,
-h6,
-.cta {
+h6 {
   font-family: "Trickster", Arial, Helvetica, sans-serif;
 }
 
 a {
   font-weight: 500;
-  color: #7c0000;
-  text-decoration: inherit;
+  color: #ffffff;
+  text-decoration: underline;
+  
+  opacity: 0.7;
+  transition: opacity 0.3s linear;
 }
 
 a:hover {
-  text-decoration: underline;
+  opacity: 1;
+}
+
+.link {
+  font-family: "Trickster", Arial, Helvetica, sans-serif;
+  background: transparent;
+  border: none;
+  opacity: 0.7;
+  transition: opacity 0.3s linear;
+}
+
+.link:hover {
+  opacity: 1;
 }
 
 .nav,
@@ -79,7 +93,7 @@ a:hover {
   }
 
   button:hover {
-    text-decoration: underline;
+    // text-decoration: underline;
   }
 }
 

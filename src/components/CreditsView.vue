@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import GlassBox from './GlassBox.vue';
+import Return from './Return.vue';
 
 </script>
 
 <template>
   <article>
-
-    <nav class="back">
-      <button @click="$emit('goto', 'home')">< revenir</button>
-    </nav>
+    <Return @goto="$emit('goto', $event)"></Return>
 
     <GlassBox :data="{ title: 'crédits' }" class="section">
       <ul>
         <li>Design: <a href="https://super8studio.eu/" target="_blank">Super8Studio</a></li>
-        <li>Dév: <a href="https://damien-doussaud.com/" target="_blank">Damien Doussaud</a></li>
+        <li>Dev: <a href="https://damien-doussaud.com/" target="_blank">Damien Doussaud</a></li>
+        <li>Contexte: <a href="https://briefweek.fr/" target="_blank">BOTW</a></li>
         <li>Moteurs d'échecs: Stockfish</li>
         <li>Logiciel 3D: Blender</li>
         <li>Moteur de rendu: Three.js</li>
       </ul>
     </GlassBox>
-
   </article>
 </template>
 

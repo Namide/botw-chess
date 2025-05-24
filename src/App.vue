@@ -85,6 +85,18 @@ main {
   padding: 1rem;
   box-sizing: border-box;
   pointer-events: none;
+
+  animation: fadein 5s linear 1;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 header {
@@ -97,6 +109,7 @@ h1 {
   font-size: 3rem;
   margin: 0;
   line-height: 1;
+  text-shadow: 0 0 8px #fffffff0;
 }
 
 p {
@@ -112,10 +125,12 @@ footer {
 button {
   background-color: transparent;
   border: none;
+  opacity: 0.6;
+  transition: opacity 0.3s linear;
 }
 
 button:hover {
-  text-decoration: underline;
+  opacity: 1;
 }
 
 .page-enter-from,

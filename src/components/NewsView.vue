@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import GlassBox from './GlassBox.vue';
+import Return from './Return.vue';
 
 const newsID = ref(-1)
 const emits = defineEmits<{
@@ -75,26 +76,23 @@ watch(newsID, (id) => {
 
 <template>
   <article>
-    <nav class="back">
-      <button @click="$emit('goto', 'home')">
-        < revenir</button>
-    </nav>
+    <Return @goto="$emit('goto', $event)"></Return>
 
     <div class="news-container">
       <Transition name="news" mode="out-in">
-        <GlassBox v-if="newsID === 0" :data="{ title: 'Tokyo, le 21 mai 2025' }" class="news-1">
+        <GlassBox v-if="newsID === 0" :data="{ title: 'Tokyo, 21 mai 2025' }" class="news-1">
           <p>Nous continuons de faire parler de nous dans le monde des échecs en ligne ! C'est cette fois notre champion
             H4ker35 qui remporte le tournoi de bullet "Champions Chess Tour" au Japon en imposant une variante peu
             commune
             de la défense sicilienne.</p>
         </GlassBox>
-        <GlassBox v-else-if="newsID === 1" :data="{ title: 'Séoul, le 10 avril 2025' }" class="news-2">
+        <GlassBox v-else-if="newsID === 1" :data="{ title: 'Séoul, 10 avril 2025' }" class="news-2">
           <p>Après une série de victoires impressionnantes, notre espoir féminin M0t0k0 a utilisé un clouage pour mettre
             le champion du monde hors course. Ce coup magistral lui octroie l'une des neuf places disponibles pour la
             richement dotée
             Coupe du Monde d'e-sport de cet été !</p>
         </GlassBox>
-        <GlassBox v-else-if="newsID === 2" :data="{ title: 'Online, le 23 mars 2025' }" class="news-3">
+        <GlassBox v-else-if="newsID === 2" :data="{ title: 'Online, 23 mars 2025' }" class="news-3">
           <p>En demi finale du "Chess LPL split", sur une ouverture classique, H4ker35 a rapidement transformé la partie
             en un jeu tactique complexe pour finalement placer une déviation qui lui permettra de s'imposer !</p>
         </GlassBox>
@@ -102,8 +100,8 @@ watch(newsID, (id) => {
     </div>
 
     <div class="nav">
-      <button @click="newsID--" :disabled="newsID < 1" class="cta">◄ actu précédente</button>
-      <button @click="newsID++" :disabled="newsID > 1" class="cta">actu suivante ►</button>
+      <button @click="newsID--" :disabled="newsID < 1" class="cta link">- actu précédente</button>
+      <button @click="newsID++" :disabled="newsID > 1" class="cta link">actu suivante -</button>
     </div>
   </article>
 </template>
@@ -133,7 +131,7 @@ article {
 }
 
 .news-1 {
-  margin: 4rem 4rem auto auto;
+  margin: auto 4rem auto auto;
   transform: rotate3d(-0.5, -1, 0, 15deg);
 }
 
@@ -143,7 +141,7 @@ article {
 }
 
 .news-3 {
-  margin: auto auto auto 4rem;
+  margin: auto auto 4rem 4rem;
   transform: rotate3d(1, 1, 0, 15deg);
 }
 
