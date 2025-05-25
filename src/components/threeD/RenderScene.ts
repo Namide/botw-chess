@@ -1,5 +1,4 @@
 import {
-  ACESFilmicToneMapping,
   Clock,
   PerspectiveCamera,
   Scene,
@@ -13,6 +12,7 @@ import {
   GammaCorrectionShader,
   OrbitControls,
   RenderPass,
+  SAOPass,
   ShaderPass,
   SMAAPass,
   SSRPass,
@@ -85,12 +85,14 @@ export class RenderScene {
       canvas,
       powerPreference: hq ? "default" : "high-performance",
     });
+
     this.renderer.setPixelRatio(
       hq ? window.devicePixelRatio : Math.min(window.devicePixelRatio, 2)
     );
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1;
+    // this.renderer.outputColorSpace = SRGBColorSpace;
+    // this.renderer.toneMapping = ACESFilmicToneMapping;
+    // this.renderer.toneMappingExposure = 1;
     this.disposeList.push(() => this.renderer.dispose());
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -153,7 +155,7 @@ export class RenderScene {
       new Vector2(window.innerWidth, window.innerHeight),
       1.5,
       0.4,
-      0.85
+      0.5
     );
     bloomPass.threshold = 1;
     bloomPass.strength = 1;
@@ -197,12 +199,9 @@ export class RenderScene {
         groundReflector: null,
         selects: null,
       });
-      
-      // ssrPass.beautyRenderTarget.samples = 2
-      // ssrPass.blurRenderTarget.samples = 4
-      // ssrPass.blurRenderTarget2.samples = 4
       ssrPass.distanceAttenuation = true;
       ssrPass.maxDistance = 5; // 2
+      ssrPass.blur = false; // 2
       this.disposeList.push(() => ssrPass.dispose());
       composer.addPass(ssrPass);
     } else {
@@ -211,12 +210,13 @@ export class RenderScene {
       composer.addPass(renderScene);
     }
 
-    // const saoPass = new SAOPass(this.scene, this.camera);
-    // saoPass.params.saoKernelRadius = 25;
-    // saoPass.params.saoIntensity = 0.005;
+    const saoPass = new SAOPass(this.scene, this.camera);
+    saoPass.params.saoKernelRadius = 25;
+    saoPass.params.saoIntensity = 0.005;
 
-    // composer.addPass(saoPass);
+    composer.addPass(saoPass);
     composer.addPass(bokehPass);
+    // composer.addPass(gammaCorrection);
 
     if (this.renderer.getPixelRatio() <= 1 && this.hq) {
       const smaaPass = new SMAAPass();
@@ -355,7 +355,6 @@ export class RenderScene {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-
     this.composer.setSize(window.innerWidth, window.innerHeight);
 
     this.render();
