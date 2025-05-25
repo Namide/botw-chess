@@ -121,6 +121,8 @@ article {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 5vh 5vw;
+  box-sizing: border-box;
 
   perspective: var(--prespective);
   perspective-origin: center center;
@@ -161,5 +163,14 @@ button:disabled {
 .news-leave-active {
   transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.81, 0, .58, .99), line-height 0.75s ease-in;
 }
+
+@media screen,
+(max-width: 640px) {
+
+  .news-1,
+  .news-2,
+  .news-3 {
+    margin: auto;
+  }
+}
 </style>
-7

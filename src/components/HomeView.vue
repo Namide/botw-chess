@@ -24,7 +24,7 @@ nav {
 }
 
 button {
-  font-size: 2em;
+  font-size: var(--font-size-nav);
   text-shadow: 0 0 8px #fffffff0;
 
   span {

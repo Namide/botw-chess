@@ -20,9 +20,15 @@
 }
 
 :root {
+  --font-size-title: 3.6em;
+  --font-size-nav: 2em;
+  --font-size-link: 1.2em;
+  --font-size-subtitle: 2.4em;
+
   font-family: "Source Code Pro", Arial, Helvetica, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  font-size: 1em;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -32,6 +38,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  @media screen, (max-width: 640px) {
+    --font-size-title: 3em;
+    --font-size-nav: 1.5em;
+    --font-size-link: 1em;
+    --font-size-subtitle: 1.5em;
+  font-size: 0.9em;
+  }
 }
 
 body {
@@ -95,7 +109,7 @@ a:hover {
 
 .back {
   position: fixed;
-  top: 2rem;
-  left: 2rem;
+  top: 2em;
+  left: 2em;
   margin: 0;
 }

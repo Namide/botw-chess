@@ -61,7 +61,7 @@ section:before {
 
 h2 {
   color: #FFFFFF;
-  font-size: 2.4rem;
+  font-size: var(--font-size-subtitle);
   margin: 0;
   text-wrap: balance
 }
@@ -80,6 +80,6 @@ button {
   border: 0;
   padding: 1rem 2rem;
   border-radius: 8px;
-  font-size: 1.2rem;
+  font-size: var(--font-size-link);
 }
 </style>

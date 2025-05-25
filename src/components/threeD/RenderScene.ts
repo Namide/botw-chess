@@ -1,5 +1,6 @@
 import {
   Clock,
+  MathUtils,
   PerspectiveCamera,
   Scene,
   Vector2,
@@ -67,12 +68,8 @@ export class RenderScene {
     this.hq = hq;
     this.clock = new Clock();
 
-    this.camera = new PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.25,
-      200
-    );
+    const { aspect, fov } = this.getAspectFov();
+    this.camera = new PerspectiveCamera(fov, aspect, 0.25, 200);
     this.camera.position.set(
       START_CAMERA.cameraPosition.x,
       START_CAMERA.cameraPosition.y,
@@ -223,7 +220,7 @@ export class RenderScene {
       this.disposeList.push(() => smaaPass.dispose());
       composer.addPass(smaaPass);
     }
-    
+
     // composer.addPass(bloomPass);
     composer.addPass(effectFilm);
     composer.addPass(effectVignette);
@@ -236,45 +233,6 @@ export class RenderScene {
 
     return { composer, bokehPass };
   }
-
-  // initShadow() {
-  //   const light1 = new DirectionalLight(0xffffff, 1);
-  //   light1.position.set(10, 10, 10);
-  //   // light1.lookAt(new Vector3())
-
-  //   const screenPixels = window.screen.height * window.screen.width;
-  //   const size = 2 ** Math.round(Math.log2(Math.sqrt(screenPixels)));
-
-  //   console.log(
-  //     `%cShadow map size %c${size}x${size}`,
-  //     "color:#F70",
-  //     "color:#07F"
-  //   );
-
-  //   // light1.shadow.normalBias = 0.05
-
-  //   light1.shadow.bias = -0.0014 * (1024 / size);
-  //   light1.castShadow = true;
-
-  //   // light1.shadow.radius = 3;
-  //   // light1.shadow.blurSamples = 5
-
-  //   light1.shadow.mapSize.width = size;
-  //   light1.shadow.mapSize.height = size;
-
-  //   light1.shadow.camera.far = 15;
-  //   light1.shadow.camera.near = 1;
-  //   light1.shadow.camera.top = 15;
-  //   light1.shadow.camera.bottom = -15;
-  //   light1.shadow.camera.left = 15;
-  //   light1.shadow.camera.right = -15;
-
-  //   this.scene.add(light1);
-
-  //   if (DEBUG) {
-  //     this.scene.add(new CameraHelper(light1.shadow.camera));
-  //   }
-  // }
 
   get focus() {
     return (this.bokehPass.uniforms as any).focus.value;
@@ -301,15 +259,15 @@ export class RenderScene {
   }
 
   removeTween(tween: Tween<any>) {
-    const i = this.tweens.findIndex(data => data.tween === tween);
+    const i = this.tweens.findIndex((data) => data.tween === tween);
     this.tweens.splice(i, 0);
   }
 
-  clearTweens(type: 'camera' | 'piece' | 'other') {
-    for (const { tween } of this.tweens.filter(data => data.type === type)) {
-      tween.onUpdate(() => 0)
-      tween.onComplete(() => 0)
-      this.removeTween(tween)
+  clearTweens(type: "camera" | "piece" | "other") {
+    for (const { tween } of this.tweens.filter((data) => data.type === type)) {
+      tween.onUpdate(() => 0);
+      tween.onComplete(() => 0);
+      this.removeTween(tween);
     }
   }
 
@@ -320,7 +278,7 @@ export class RenderScene {
   ) {
     this.tweens.push({ type, tween });
     tween.onComplete(() => {
-      this.removeTween(tween)
+      this.removeTween(tween);
       if (onComplete) {
         onComplete();
       }
@@ -350,8 +308,28 @@ export class RenderScene {
     this.composer.render();
   }
 
+  getAspectFov() {
+    const FOV = 45;
+    const aspect = window.innerWidth / window.innerHeight;
+
+    const fov: number =
+      aspect < 1
+        ? 2 * FOV -
+          (Math.atan(Math.tan((FOV * Math.PI) / 180 / 2) * aspect) * 360) /
+            Math.PI
+        : FOV;
+
+    return {
+      aspect,
+      fov,
+    };
+  }
+
   onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    const { aspect, fov } = this.getAspectFov();
+
+    this.camera.aspect = aspect;
+    this.camera.fov = fov;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);

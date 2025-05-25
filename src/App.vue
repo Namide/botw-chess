@@ -100,7 +100,7 @@ main {
 header {
   position: relative;
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 4em;
 
   button {
     opacity: 0.9;
@@ -108,7 +108,7 @@ header {
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: var(--font-size-title);
   margin: 0;
   line-height: 1;
   text-shadow: 0 0 8px #fffffff0;
