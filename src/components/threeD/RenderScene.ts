@@ -1,6 +1,5 @@
 import {
   Clock,
-  MathUtils,
   PerspectiveCamera,
   Scene,
   Vector2,
