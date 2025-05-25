@@ -11,7 +11,6 @@ import {
   Vector3,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import botwChessSrc from "../../assets/botw-chess-009.glb?url";
 import environmentMapSrc from "../../assets/bg-3d.jpg?url";
 import { shuffle } from "../../pure/shuffle";
 import { Easing, Tween } from "three/examples/jsm/libs/tween.module.js";
@@ -141,7 +140,7 @@ export class ChessScene extends RenderScene {
     const loader = new GLTFLoader();
 
     return new Promise((resolve) => {
-      loader.load(botwChessSrc, async (gltf) => {
+      loader.load("/chess/botw-chess-011.gltf", async (gltf) => {
         const model = gltf.scene;
 
         const meshes = {};
@@ -599,7 +598,7 @@ export class ChessScene extends RenderScene {
   // }
 
   capturePieceByPosition(square: Square, pieceSensitive: string, delay = 400) {
-    const ROT_MAX = 5;
+    const ROT_MAX = 10;
     const DIST = 20;
     const duration = 1000;
     const piece = this.getPiece(square, pieceSensitive);
@@ -622,41 +621,44 @@ export class ChessScene extends RenderScene {
       new Euler(Math.random(), Math.random(), Math.random())
     );
 
+    const onUpdate = ([x, y, z, r]: number[]) => {
+      piece.position.set(x, y, z);
+      const quat = new Quaternion().slerpQuaternions(
+        QUATERNION_START,
+        QUATERNION_END,
+        r * ROT_MAX
+      );
+      piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
+    };
+
     this.addTween(
       new Tween([...POSITION_START.toArray(), 0], false)
-        .to([...POSITION_MIDDLE.toArray(), ROT_MAX / 2], duration / 2)
+        .to([...POSITION_MIDDLE.toArray(), 0.25], duration / 2)
         .delay(delay)
         .easing(Easing.Linear.None)
-        .onUpdate(([x, y, z, r]: number[]) => {
-          piece.position.set(x, y, z);
-          const quat = new Quaternion().slerpQuaternions(
-            QUATERNION_START,
-            QUATERNION_END,
-            r
-          );
-          piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
-        }),
+        .onUpdate(onUpdate),
       "piece",
       () => {
         this.addTween(
-          new Tween([...POSITION_MIDDLE.toArray(), ROT_MAX / 2], false)
+          new Tween([...piece.position.toArray(), 0.25], false)
             .to(
-              [POSITION_END.x, POSITION_END.y, POSITION_END.z, ROT_MAX],
+              [POSITION_END.x, POSITION_END.y, POSITION_END.z, 0.5],
               duration / 2
             )
             .easing(Easing.Quadratic.Out)
-            .onUpdate(([x, y, z, r]: number[]) => {
-              piece.position.set(x, y, z);
-              const quat = new Quaternion().slerpQuaternions(
-                QUATERNION_START,
-                QUATERNION_END,
-                r
-              );
-              piece.quaternion.set(quat.x, quat.y, quat.z, quat.w);
-            }),
+            .onUpdate(onUpdate),
           "piece",
           () => {
-            piece.visible = false;
+            this.addTween(
+              new Tween([...piece.position.toArray(), 0.5], false)
+                .to([0, POSITION_END.y * 4, 0, 1], duration)
+                .easing(Easing.Quadratic.In)
+                .onUpdate(onUpdate),
+              "piece",
+              () => {
+                piece.visible = false;
+              }
+            );
           }
         );
       }
@@ -740,19 +742,16 @@ export class ChessScene extends RenderScene {
     this.playPiece(piece, toXYZ, duration);
   }
 
-  dropPiece(
-    piece: Mesh<BufferGeometry, Material>,
-    duration = 250
-  ) {
-    const dragTo = this.threeDPositionToChessPosition(piece.position)
-    const toXYZ = this.squareToXYZ(dragTo)
+  dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
+    const dragTo = this.threeDPositionToChessPosition(piece.position);
+    const toXYZ = this.squareToXYZ(dragTo);
 
     this.addTween(
       new Tween([...piece.position.toArray()], false)
         .to([toXYZ.x, toXYZ.y, toXYZ.z], duration)
         .easing(Easing.Quadratic.In)
         .onUpdate(([x, y, z]: number[]) => {
-          piece.position.set(x, y, z)
+          piece.position.set(x, y, z);
         }),
       "piece"
     );

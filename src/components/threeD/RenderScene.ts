@@ -13,6 +13,7 @@ import {
   GammaCorrectionShader,
   OrbitControls,
   RenderPass,
+  SAOPass,
   ShaderPass,
   SMAAPass,
   SSRPass,
@@ -23,6 +24,7 @@ import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import GameStats from "gamestats.js";
 import { DEBUG, START_CAMERA } from "../../conf";
 import { Shadows } from "./Shadows";
+import { BokehPass as BokehPass2 } from "./BokehPass";
 
 let stats: GameStats;
 
@@ -195,6 +197,10 @@ export class RenderScene {
         groundReflector: null,
         selects: null,
       });
+      
+      // ssrPass.beautyRenderTarget.samples = 2
+      // ssrPass.blurRenderTarget.samples = 4
+      // ssrPass.blurRenderTarget2.samples = 4
       ssrPass.distanceAttenuation = true;
       ssrPass.maxDistance = 5; // 2
       this.disposeList.push(() => ssrPass.dispose());
@@ -205,19 +211,20 @@ export class RenderScene {
       composer.addPass(renderScene);
     }
 
-    if (this.renderer.getPixelRatio() <= 1 && this.hq) {
-      const smaaPass = new SMAAPass();
-      this.disposeList.push(() => smaaPass.dispose());
-      composer.addPass(smaaPass);
-    }
-
     // const saoPass = new SAOPass(this.scene, this.camera);
     // saoPass.params.saoKernelRadius = 25;
     // saoPass.params.saoIntensity = 0.005;
 
     // composer.addPass(saoPass);
     composer.addPass(bokehPass);
-    composer.addPass(bloomPass);
+
+    if (this.renderer.getPixelRatio() <= 1 && this.hq) {
+      const smaaPass = new SMAAPass();
+      this.disposeList.push(() => smaaPass.dispose());
+      composer.addPass(smaaPass);
+    }
+    
+    // composer.addPass(bloomPass);
     composer.addPass(effectFilm);
     composer.addPass(effectVignette);
 

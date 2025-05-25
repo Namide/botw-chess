@@ -64,7 +64,7 @@ watch(page, page => {
     </Transition>
 
     <footer>
-      <button @click="page = 'credits'">Crédits Alan & Damien</button>
+      <button @click="page = 'credits'">- crédits Alan & Damien -</button>
     </footer>
 
   </main>

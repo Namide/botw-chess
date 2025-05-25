@@ -12,10 +12,12 @@ import Return from './Return.vue';
       <ul>
         <li>Design: <a href="https://super8studio.eu/" target="_blank">Super8Studio</a></li>
         <li>Dev: <a href="https://damien-doussaud.com/" target="_blank">Damien Doussaud</a></li>
-        <li>Contexte: <a href="https://briefweek.fr/" target="_blank">BOTW</a></li>
-        <li>Moteurs d'échecs: Stockfish</li>
-        <li>Logiciel 3D: Blender</li>
-        <li>Moteur de rendu: Three.js</li>
+        <li class="secondary">Contexte: <a href="https://briefweek.fr/" target="_blank">BOTW</a></li>
+        <li class="secondary">Moteurs d'échecs: Stockfish</li>
+        <li class="secondary">Logiciel 3D: Blender</li>
+        <li class="secondary">Moteur de rendu: Three.js</li>
+        <li class="secondary">Matériaux: polycount</li>
+        <li class="secondary">Inspiration: Louis Berger</li>
       </ul>
     </GlassBox>
   </article>
@@ -37,5 +39,9 @@ article {
 
 ul {
   text-align: left;
+}
+
+.secondary {
+  opacity: 0.65;
 }
 </style>
