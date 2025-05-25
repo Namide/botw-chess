@@ -25,7 +25,9 @@ nav {
 
 button {
   font-size: var(--font-size-nav);
-  text-shadow: 0 0 8px #fffffff0;
+  color: #ffffff;
+  opacity: 0.9;
+  text-shadow: 0 0 8px #ffffffb0;
 
   span {
     display: inline-block;

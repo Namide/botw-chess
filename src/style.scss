@@ -39,7 +39,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media screen, (max-width: 640px) {
+  @media screen and (max-width: 640px) {
     --font-size-title: 3em;
     --font-size-nav: 1.5em;
     --font-size-link: 1em;
