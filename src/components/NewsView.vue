@@ -164,9 +164,7 @@ button:disabled {
   transition: opacity 0.75s linear, transform 0.75s cubic-bezier(.81, 0, .58, .99), line-height 0.75s ease-in;
 }
 
-@media screen,
-(max-width: 640px) {
-
+@media screen and (max-width: 640px) {
   .news-1,
   .news-2,
   .news-3 {
