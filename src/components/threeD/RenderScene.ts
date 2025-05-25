@@ -1,10 +1,4 @@
-import {
-  Clock,
-  PerspectiveCamera,
-  Scene,
-  Vector2,
-  WebGLRenderer,
-} from "three";
+import { Clock, PerspectiveCamera, Scene, Vector2, WebGLRenderer } from "three";
 import {
   BokehPass,
   EffectComposer,
@@ -311,12 +305,15 @@ export class RenderScene {
     const FOV = 45;
     const aspect = window.innerWidth / window.innerHeight;
 
-    const fov: number =
-      aspect < 1
-        ? 2 * FOV -
-          (Math.atan(Math.tan((FOV * Math.PI) / 180 / 2) * aspect) * 360) /
-            Math.PI
-        : FOV;
+    let fov;
+    if (aspect < 1) {
+      const fovHorizontalRad = (FOV * Math.PI) / 180;
+      const fovVerticalRad =
+        2 * Math.atan(Math.tan(fovHorizontalRad / 2) / aspect);
+      fov = (fovVerticalRad * 180) / Math.PI;
+    } else {
+      fov = FOV;
+    }
 
     return {
       aspect,
