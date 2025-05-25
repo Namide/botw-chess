@@ -740,18 +740,24 @@ export class ChessScene extends RenderScene {
     this.playPiece(piece, toXYZ, duration);
   }
 
-  dropPiece(piece: Mesh<BufferGeometry, Material>, duration = 250) {
+  dropPiece(
+    piece: Mesh<BufferGeometry, Material>,
+    duration = 250
+  ) {
+    const dragTo = this.threeDPositionToChessPosition(piece.position)
+    const toXYZ = this.squareToXYZ(dragTo)
+
     this.addTween(
-      new Tween([piece.position.y], false)
-        .to([0], duration)
+      new Tween([...piece.position.toArray()], false)
+        .to([toXYZ.x, toXYZ.y, toXYZ.z], duration)
         .easing(Easing.Quadratic.In)
-        .onUpdate(([y]: number[]) => {
-          piece.position.y = y;
+        .onUpdate(([x, y, z]: number[]) => {
+          piece.position.set(x, y, z)
         }),
       "piece"
     );
 
-    return this.threeDPositionToChessPosition(piece.position);
+    return dragTo;
   }
 
   random() {
