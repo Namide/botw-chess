@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import GlassBox from './GlassBox.vue';
 import Return from './Return.vue';
-
 </script>
 
 <template>
@@ -17,6 +16,7 @@ import Return from './Return.vue';
         <li class="secondary">Logiciel 3D: Blender</li>
         <li class="secondary">Moteur de rendu: Three.js</li>
         <li class="secondary">Matériaux: polycount</li>
+        <li class="secondary">Fonts: Alexandre Créquer & Paul D. Hunt</li>
         <li class="secondary">Inspiration: Louis Berger</li>
       </ul>
     </GlassBox>

@@ -57,6 +57,9 @@ const piecesNames = [
 ] as const;
 type PieceName = (typeof piecesNames)[number];
 
+/**
+ * Generate 3D chess scene
+ */
 export class ChessScene extends RenderScene {
   meshes?: Record<
     "table" | "board" | PieceName,
@@ -79,7 +82,6 @@ export class ChessScene extends RenderScene {
 
     ChessScene.instance = this;
 
-    // DEBUG
     if (DEBUG) {
       let to: number;
       this.controls.addEventListener("change", () => {
@@ -112,28 +114,7 @@ export class ChessScene extends RenderScene {
 
     Promise.all([this.loadBackground(), this.loadModel()]).then(() => {
       this.start();
-
-      // this.moveCamera(
-      //   {
-      //     cameraPosition: {
-      //       x: 1.1756337566888895,
-      //       y: 2.8958180682869568,
-      //       z: 18.09526382806227,
-      //     },
-      //     targetPosition: {
-      //       x: 0.9692201953718734,
-      //       y: 3.22972687934564,
-      //       z: -1.510983047656019,
-      //     },
-      //     focus: 17,
-      //     aperture: 0.002,
-      //     maxblur: 0.01,
-      //   },
-      //   { duration: 5000, easing: Easing.Exponential.Out }
-      // );
     });
-
-    // Model
   }
 
   async loadModel() {
@@ -158,13 +139,6 @@ export class ChessScene extends RenderScene {
                 child.rotation.y += Math.PI / 2;
               }
             }
-
-            // if (piecesNames.indexOf(child.name as any) > 0) {
-            //   child.castShadow = true
-            //   child.receiveShadow = true
-            // } else {
-            //   child.receiveShadow = true
-            // }
           }
         }
 
@@ -203,27 +177,6 @@ export class ChessScene extends RenderScene {
         this.moveCamera(START_CAMERA, { duration: 0 });
         this.reset(START_POSITIONS, 0);
 
-        // const meshTemp = new Mesh(
-        //   new PlaneGeometry(3, 5),
-        //   new MeshPhysicalMaterial( {
-        // 	color: 0xEEEEEE,
-        // 	metalness: 0,
-        // 	roughness: 0.4,
-        // 	ior: 1.5,
-        // 	// alphaMap: texture,
-        // 	// envMap: hdrEquirect,
-        // 	// envMapIntensity: params.envMapIntensity,
-        // 	transmission: 1, // use material.transmission for glass materials
-        // 	specularIntensity: 1,
-        // 	specularColor: 0xffffff,
-        // 	opacity: 1,
-        // 	side: DoubleSide,
-        // 	transparent: true
-        // } )
-        // )
-        // this.scene.add(meshTemp)
-
-        // this.render();
         resolve(true);
       });
     });
@@ -246,7 +199,6 @@ export class ChessScene extends RenderScene {
         this.scene.background = texture;
 
         resolve(true);
-        // this.render();
       });
     });
   }
@@ -395,7 +347,6 @@ export class ChessScene extends RenderScene {
             );
             this.controls.target.set(targetX, targetY, targetZ);
             this.camera.lookAt(this.controls.target);
-            // this.controls.update();
             this.focus = focus;
             this.aperture = aperture;
             this.maxblur = maxblur;
@@ -411,7 +362,6 @@ export class ChessScene extends RenderScene {
 
     const positionnedPieces: {
       position: { x: number; y: number; z: number };
-      // square: Square;
       mesh: Mesh;
     }[] = [];
 
@@ -433,7 +383,6 @@ export class ChessScene extends RenderScene {
           const square = `${"abcdefgh"[columnIndex]}${8 - rowIndex}` as Square;
           positionnedPieces.push({
             position: this.squareToXYZ(square),
-            // square: 'abcdefgh'[columnIndex] + (columnIndex + 1) as Square,
             mesh,
           });
           columnIndex++;
@@ -590,20 +539,6 @@ export class ChessScene extends RenderScene {
     const i = 8 - Number(position[1]);
     return this.meshesPositions[i][j];
   }
-
-  // chessPositionToPiece(position: string) {
-  //   const xyz = this.squareToXYZ(position);
-  //   const pieces = piecesNames
-  //     .map((name) => this.meshes![name])
-  //     .map((piece) => ({
-  //       piece,
-  //       distance: Math.sqrt(
-  //         (xyz.x - piece.position.x) ** 2 + (xyz.z - piece.position.z) ** 2
-  //       ),
-  //     }));
-  //   pieces.sort((a, b) => a.distance - b.distance);
-  //   return pieces[0].piece;
-  // }
 
   capturePieceByPosition(square: Square, pieceSensitive: string, delay = 400) {
     const ROT_MAX = 10;

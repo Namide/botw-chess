@@ -5,7 +5,7 @@ Creation of a fictitious project in one week for the [Brief Of The Week](https:/
 Website: **[botw-chess.namide.com](https://botw-chess.namide.com/)**  
 View the [brief](./doc/brief.pdf)
 
-![](./public/chess.jpg)
+![](./public/assets/chess.jpg)
 
 ## Credits
 
@@ -17,6 +17,7 @@ View the [brief](./doc/brief.pdf)
 | Render engine | Three.js |
 | Materials | polycount |
 | Inspiration | Louis Berger |
+| Fonts | Alexandre Créquer & Paul D. Hunt |
 
 ## Tools
 

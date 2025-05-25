@@ -66,7 +66,6 @@ canvas {
 
   opacity: 0;
   transition: transform 2s ease-out, opacity 2s linear;
-  /* transform: scale(1.1); */
 }
 
 .is-ready {

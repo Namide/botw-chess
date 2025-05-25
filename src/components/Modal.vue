@@ -62,9 +62,6 @@ aside {
   opacity: 0;
 }
 
-/* .modal-enter,
-.modal-leave { opacity: 1 } */
-
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.75s, transform 0.75s;

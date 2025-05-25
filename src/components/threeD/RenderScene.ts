@@ -28,12 +28,13 @@ import { Shadows } from "./Shadows";
 let stats: GameStats;
 
 if (DEBUG) {
-  stats = new GameStats({
-    // targetFPS: 60
-  });
+  stats = new GameStats({});
   document.body.appendChild(stats.dom);
 }
 
+/**
+ * Generate 3D empty scene width post process
+ */
 export class RenderScene {
   scene;
   camera;

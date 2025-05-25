@@ -39,8 +39,6 @@ watch(page, page => {
       })
       break
     case 'join':
-      // position.value = ''
-      // camera.value = ''
       break
   }
 })
@@ -64,7 +62,7 @@ watch(page, page => {
     </Transition>
 
     <footer>
-      <button @click="page = 'credits'">- crédits Super8Studio & Damien -</button>
+      <button @click="page = 'credits'">- crédits -</button>
     </footer>
 
   </main>
@@ -141,9 +139,6 @@ button:hover {
 .page-leave-to {
   opacity: 0
 }
-
-/* .page-enter,
-.page-leave { opacity: 1 } */
 
 .page-enter-active,
 .page-leave-active {

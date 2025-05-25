@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 64 64"
+   version="1.1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient3">
+      <stop
+         style="stop-color:#04211f;stop-opacity:1;"
+         offset="0.28854963"
+         id="stop4" />
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="1"
+         id="stop5" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient1">
+      <stop
+         style="stop-color:#95b6a0;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#6b8c7d;stop-opacity:1;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="64"
+       y1="32"
+       x2="-1.8280461e-07"
+       y2="32"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       xlink:href="#linearGradient3"
+       id="radialGradient4"
+       cx="38.658436"
+       cy="23.272049"
+       fx="38.658436"
+       fy="23.272049"
+       r="27"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.2635295,-0.00761148,0.0088934,1.4763322,-10.394605,-10.790979)" />
+  </defs>
+  <g>
+    <rect
+       style="fill:url(#linearGradient2);stroke-width:0.786325;stroke-dasharray:0.786325, 0.786325"
+       id="rect1"
+       width="64"
+       height="64"
+       x="2.3581095e-09"
+       y="-5.5511151e-17" />
+    <circle
+       style="fill:url(#radialGradient4);stroke-width:0.945348;stroke-dasharray:0.945348, 0.945348"
+       id="path2"
+       cx="32"
+       cy="32"
+       r="27" />
+  </g>
+</svg>

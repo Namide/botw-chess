@@ -25,16 +25,6 @@ section {
   max-width: 720px;
   text-align: center;
   position: relative;
-
-  // transform-origin: center center;
-  // transform-style: preserve-3d;
-  // perspective: var(--prespective);
-
-  // padding: 2rem;
-  // backdrop-filter: blur(16px);
-  // background-color: #00000050;
-  // border-radius: 2rem;
-  // border: 2px solid #FFFFFF10;
 }
 
 section>* {
@@ -55,14 +45,9 @@ section>* {
 }
 
 section:before {
-  // --padding: 2rem;
   content: "";
   display: block;
   position: absolute;
-  // top: calc(-1 * var(--padding));
-  // left: calc(-1 * var(--padding));
-  // width: calc(100% + 2 * var(--padding));
-  // height: calc(100% + 2 * var(--padding));
   top: 0;
   left: 0;
   width: 100%;
@@ -78,7 +63,6 @@ h2 {
   color: #FFFFFF;
   font-size: 2.4rem;
   margin: 0;
-  // transform: translateZ(40px);
   text-wrap: balance
 }
 
@@ -86,7 +70,6 @@ p {
   color: #FFFFFF;
   margin: 0;
   opacity: 1;
-  // transform: translateZ(20px);
   text-wrap: balance
 }
 

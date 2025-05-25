@@ -57,8 +57,7 @@ export class BokehPass extends Pass {
     this.uniforms["tDepth"].value = this.rtTextureDepth.texture;
     this.uniforms["textureWidth"].value = window.innerWidth;
     this.uniforms["textureHeight"].value = window.innerHeight;
-    // this.uniforms['depthblur'].value = false
-
+  
     // Vignette
     this.uniforms["vignetting"].value = true;
     this.uniforms["fstop"].value = this.fstop; // Blur gradiant
@@ -115,8 +114,6 @@ export class BokehPass extends Pass {
     renderer: WebGLRenderer,
     writeBuffer: WebGLRenderTarget,
     readBuffer: WebGLRenderTarget
-    // deltaTime: number,
-    // maskActive: boolean
   ) {
     // render depth into texture
 
@@ -131,7 +128,6 @@ export class BokehPass extends Pass {
 
     // render bokeh composite
 
-    // this.uniforms["focalDepth"].value = Math.sin(Math.random() * Math.PI * 2) * 1000 + 1000;
     this.uniforms["focalDepth"].value = this.focalDepth;
     this.uniforms["fstop"].value = this.fstop;
     this.uniforms["tColor"].value = readBuffer.texture;
