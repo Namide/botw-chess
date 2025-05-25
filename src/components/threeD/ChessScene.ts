@@ -151,6 +151,14 @@ export class ChessScene extends RenderScene {
           } else {
             (meshes as any)[child.name] = child;
 
+            if (piecesNames.indexOf(child.name as any) > 0) {
+              if (child.name.toUpperCase() === child.name) {
+                child.rotation.y -= Math.PI / 2;
+              } else {
+                child.rotation.y += Math.PI / 2;
+              }
+            }
+
             // if (piecesNames.indexOf(child.name as any) > 0) {
             //   child.castShadow = true
             //   child.receiveShadow = true

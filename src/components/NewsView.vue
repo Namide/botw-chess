@@ -89,8 +89,7 @@ watch(newsID, (id) => {
         <GlassBox v-else-if="newsID === 1" :data="{ title: 'Séoul, 10 avril 2025' }" class="news-2">
           <p>Après une série de victoires impressionnantes, notre espoir féminin M0t0k0 a utilisé un clouage pour mettre
             le champion du monde hors course. Ce coup magistral lui octroie l'une des neuf places disponibles pour la
-            richement dotée
-            Coupe du Monde d'e-sport de cet été !</p>
+            richement dotée Coupe du Monde de cet été !</p>
         </GlassBox>
         <GlassBox v-else-if="newsID === 2" :data="{ title: 'Online, 23 mars 2025' }" class="news-3">
           <p>En demi finale du "Chess LPL split", sur une ouverture classique, H4ker35 a rapidement transformé la partie
@@ -143,6 +142,11 @@ article {
 .news-3 {
   margin: auto auto 4rem 4rem;
   transform: rotate3d(1, 1, 0, 15deg);
+}
+
+button:disabled {
+  opacity: 0.25;
+  pointer-events: none;
 }
 
 .news-enter-from,

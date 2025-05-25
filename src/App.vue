@@ -51,7 +51,7 @@ watch(page, page => {
   <main>
 
     <header>
-      <h1>Ultra Mat</h1>
+      <button @click="page = 'home'"><h1>Ultra Mat</h1></button>
       <p>La team esport du blitz chess</p>
     </header>
 
@@ -64,7 +64,7 @@ watch(page, page => {
     </Transition>
 
     <footer>
-      <button @click="page = 'credits'">- crédits Alan & Damien -</button>
+      <button @click="page = 'credits'">- crédits Super8Studio & Damien -</button>
     </footer>
 
   </main>
@@ -103,6 +103,10 @@ header {
   position: relative;
   text-align: center;
   margin-top: 4rem;
+
+  button {
+    opacity: 0.9;
+  }
 }
 
 h1 {

@@ -21,10 +21,10 @@ watch(key, () => {
 </script>
 
 <template>
-  <Transition name="modal" :key="key" :duration="750">
-    <aside v-if="key">
+  <Transition name="modal" >
+    <aside v-if="key" >
       <div class="bg"></div>
-      <GlassBox :data="data" :style="style" @action="$emit('close')" class="glass-box"></GlassBox>
+      <GlassBox :data="data" :style="style" @action="$emit('close')" class="glass-box" :key="key"></GlassBox>
     </aside>
   </Transition>
 </template>
@@ -57,20 +57,16 @@ aside {
   margin-bottom: 10vh;
 }
 
-.modal-enter-from .bg,
-.modal-leave-to .bg,
-.modal-enter-from section,
-.modal-leave-to section {
+.modal-enter-from,
+.modal-leave-to {
   opacity: 0;
 }
 
 /* .modal-enter,
 .modal-leave { opacity: 1 } */
 
-.modal-enter-active .bg,
-.modal-leave-active .bg,
-.modal-leave-active section,
-.modal-leave-active section {
+.modal-enter-active,
+.modal-leave-active {
   transition: opacity 0.75s, transform 0.75s;
 }
 </style>

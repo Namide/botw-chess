@@ -13,7 +13,6 @@ import {
   GammaCorrectionShader,
   OrbitControls,
   RenderPass,
-  SAOPass,
   ShaderPass,
   SMAAPass,
   SSRPass,
@@ -24,7 +23,7 @@ import { Tween } from "three/examples/jsm/libs/tween.module.js";
 import GameStats from "gamestats.js";
 import { DEBUG, START_CAMERA } from "../../conf";
 import { Shadows } from "./Shadows";
-import { BokehPass as BokehPass2 } from "./BokehPass";
+// import { BokehPass as BokehPass2 } from "./BokehPass";
 
 let stats: GameStats;
 
