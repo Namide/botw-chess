@@ -71,14 +71,12 @@ export class ChessScene extends RenderScene {
 
   constructor({
     canvas,
-    hq,
     onReady,
   }: {
     canvas: HTMLCanvasElement;
-    hq: boolean;
     onReady: () => void;
   }) {
-    super({ canvas, hq, onReady });
+    super({ canvas, onReady });
 
     ChessScene.instance = this;
 
@@ -161,7 +159,7 @@ export class ChessScene extends RenderScene {
         }
 
         // wait until the model can be added to the scene without blocking due to shader compilation
-        await this.renderer.compileAsync(model, this.camera, this.scene);
+        // await this.renderer.compileAsync(model, this.camera, this.scene);
 
         this.scene.add(model);
 

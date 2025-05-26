@@ -8,10 +8,6 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: "node_modules/detect-gpu/dist/benchmarks",
-          dest: "",
-        },
-        {
           src: "node_modules/stockfish.js",
           dest: "",
         },

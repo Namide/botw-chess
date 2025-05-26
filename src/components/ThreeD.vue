@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { ChessScene } from './threeD/ChessScene';
-import { getGPUTier } from 'detect-gpu';
 
 const props = defineProps<{ position?: string, camera?: string, random?: number }>()
 
@@ -42,12 +41,7 @@ watch(() => props.random, () => {
 })
 
 async function init3D(canvas: HTMLCanvasElement) {
-  // Get GPU performances
-  const gpuTier = await getGPUTier({
-    benchmarksURL: `${import.meta.env.BASE_URL}benchmarks`,
-  });
-  const hq = gpuTier.tier > 2;
-  chessScene = new ChessScene({ canvas, hq, onReady: () => isReady.value = true })
+  chessScene = new ChessScene({ canvas, onReady: () => isReady.value = true })
 }
 
 </script>
@@ -64,12 +58,11 @@ canvas {
   top: 0;
   left: 0;
 
-  opacity: 0;
-  transition: transform 2s ease-out, opacity 2s linear;
+  opacity: 0.01;
+  transition: opacity 2s linear;
 }
 
 .is-ready {
   opacity: 1;
-  transform: none;
 }
 </style>

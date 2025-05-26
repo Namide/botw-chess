@@ -41,16 +41,14 @@ export class RenderScene {
   bokehPass: BokehPass;
   onReady;
   shadows;
-
-  hq;
+  ssrPass;
+  smaaPass;
 
   constructor({
     canvas,
-    hq,
     onReady,
   }: {
     canvas: HTMLCanvasElement;
-    hq: boolean;
     onReady: () => void;
   }) {
     this.render = this.render.bind(this);
@@ -58,7 +56,6 @@ export class RenderScene {
     this.tick = this.tick.bind(this);
 
     this.onReady = onReady;
-    this.hq = hq;
     this.clock = new Clock();
 
     const { aspect, fov } = this.getAspectFov();
@@ -73,12 +70,10 @@ export class RenderScene {
     this.renderer = new WebGLRenderer({
       antialias: false,
       canvas,
-      powerPreference: hq ? "default" : "high-performance",
+      powerPreference: "default",
     });
 
-    this.renderer.setPixelRatio(
-      hq ? window.devicePixelRatio : Math.min(window.devicePixelRatio, 2)
-    );
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     // this.renderer.outputColorSpace = SRGBColorSpace;
     // this.renderer.toneMapping = ACESFilmicToneMapping;
@@ -100,9 +95,11 @@ export class RenderScene {
       this.controls.enabled = false;
     }
 
-    const { composer, bokehPass } = this.initPostProcess();
+    const { composer, bokehPass, ssrPass, smaaPass } = this.initPostProcess();
     this.composer = composer;
     this.bokehPass = bokehPass;
+    this.ssrPass = ssrPass;
+    this.smaaPass = smaaPass;
     this.focus = START_CAMERA.focus;
     this.aperture = START_CAMERA.aperture;
     this.maxblur = START_CAMERA.maxblur;
@@ -124,8 +121,41 @@ export class RenderScene {
     });
   }
 
-  start() {
-    this.tick();
+  async start() {
+    this.renderer.compile(this.scene, this.camera);
+
+    // Drop frames to stabilize GPU (to fix Chrome)
+    for (let i = 0; i < 5; i++) {
+      this.tick();
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(1)));
+    }
+
+    const times: { calcul: number; wait: number; fps: number }[] = [];
+    let beforeTime: number, elapsedTime: number, waitTime: number;
+
+    // Calculate times
+    for (let i = 0; i < 5; i++) {
+      beforeTime = performance.now();
+      this.tick();
+      elapsedTime = performance.now();
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(1)));
+      waitTime = performance.now();
+      times.push({
+        calcul: elapsedTime - beforeTime,
+        wait: waitTime - elapsedTime,
+        fps: 1000 / (waitTime - beforeTime),
+      });
+    }
+
+    const worstTime = times.sort(((a, b) => a.fps - b.fps))[0]
+
+    if (worstTime.fps < 30) {
+      console.log('🐌 slow GPU, remove SSR and SMAA')
+      this.increasePerformances()
+    } else {
+      console.log('🐇 fast GPU detected, keep SSR and SMAA')
+    }
+
     this.onReady();
     this.renderer.setAnimationLoop(this.tick);
   }
@@ -179,26 +209,23 @@ export class RenderScene {
     );
     this.disposeList.push(() => composer.dispose());
 
-    if (this.hq) {
-      const ssrPass = new SSRPass({
-        renderer: this.renderer,
-        scene: this.scene,
-        camera: this.camera,
-        width: innerWidth,
-        height: innerHeight,
-        groundReflector: null,
-        selects: null,
-      });
-      ssrPass.distanceAttenuation = true;
-      ssrPass.maxDistance = 5; // 2
-      ssrPass.blur = false; // 2
-      this.disposeList.push(() => ssrPass.dispose());
-      composer.addPass(ssrPass);
-    } else {
-      const renderScene = new RenderPass(this.scene, this.camera);
-      this.disposeList.push(() => renderScene.dispose());
-      composer.addPass(renderScene);
-    }
+    const renderPass = new RenderPass(this.scene, this.camera);
+    composer.addPass(renderPass);
+
+    const ssrPass = new SSRPass({
+      renderer: this.renderer,
+      scene: this.scene,
+      camera: this.camera,
+      width: innerWidth,
+      height: innerHeight,
+      groundReflector: null,
+      selects: null,
+    });
+    ssrPass.distanceAttenuation = true;
+    ssrPass.maxDistance = 5; // 2
+    ssrPass.blur = false; // 2
+    this.disposeList.push(() => ssrPass.dispose());
+    composer.addPass(ssrPass);
 
     const saoPass = new SAOPass(this.scene, this.camera);
     saoPass.params.saoKernelRadius = 25;
@@ -208,9 +235,10 @@ export class RenderScene {
     composer.addPass(bokehPass);
     // composer.addPass(gammaCorrection);
 
-    if (this.renderer.getPixelRatio() <= 1 && this.hq) {
-      const smaaPass = new SMAAPass();
-      this.disposeList.push(() => smaaPass.dispose());
+    let smaaPass: SMAAPass | undefined;
+    if (this.renderer.getPixelRatio() <= 1) {
+      smaaPass = new SMAAPass();
+      this.disposeList.push(() => smaaPass?.dispose());
       composer.addPass(smaaPass);
     }
 
@@ -224,7 +252,17 @@ export class RenderScene {
     //   composer.renderTarget2.samples = 8;
     // }
 
-    return { composer, bokehPass };
+    return { composer, bokehPass, ssrPass, smaaPass };
+  }
+
+  increasePerformances() {
+    this.ssrPass.dispose();
+    this.composer.removePass(this.ssrPass);
+
+    if (this.smaaPass) {
+      this.composer.removePass(this.smaaPass);
+    }
+    this.smaaPass?.dispose();
   }
 
   get focus() {
@@ -298,7 +336,7 @@ export class RenderScene {
 
   render() {
     // this.renderer.render(this.scene, this.camera);
-    this.composer.render();
+    this.composer.render(1000 / 60);
   }
 
   getAspectFov() {
