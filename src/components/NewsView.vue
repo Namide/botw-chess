@@ -82,17 +82,17 @@ watch(newsID, (id) => {
       <Transition name="news" mode="out-in">
         <GlassBox v-if="newsID === 0" :data="{ title: 'Tokyo, 21 mai 2025' }" class="news-1">
           <p>Nous continuons de faire parler de nous dans le monde des échecs en ligne ! C'est cette fois notre champion
-            H4ker35 qui remporte le tournoi de bullet "Champions Chess Tour" au Japon en imposant une variante peu
+            <strong>H4ker35</strong> qui remporte le tournoi de bullet "Champions Chess Tour" au Japon en imposant une variante peu
             commune
             de la défense sicilienne.</p>
         </GlassBox>
         <GlassBox v-else-if="newsID === 1" :data="{ title: 'Séoul, 10 avril 2025' }" class="news-2">
-          <p>Après une série de victoires impressionnantes, notre espoir féminin M0t0k0 a utilisé un clouage pour mettre
+          <p>Après une série de victoires impressionnantes, notre espoir féminin <strong>M0t0k0_v4</strong> a utilisé un clouage pour mettre
             le champion du monde hors course. Ce coup magistral lui octroie l'une des neuf places disponibles pour la
             richement dotée Coupe du Monde de cet été !</p>
         </GlassBox>
         <GlassBox v-else-if="newsID === 2" :data="{ title: 'Online, 23 mars 2025' }" class="news-3">
-          <p>En demi finale du "Chess LPL split", sur une ouverture classique, H4ker35 a rapidement transformé la partie
+          <p>En demi finale du "Chess LPL split", sur une ouverture classique, <strong>H4ker35</strong> a rapidement transformé la partie
             en un jeu tactique complexe pour finalement placer une déviation qui lui permettra de s'imposer !</p>
         </GlassBox>
       </Transition>
