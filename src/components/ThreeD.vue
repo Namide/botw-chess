@@ -46,7 +46,7 @@ async function init3D(canvas: HTMLCanvasElement) {
   const gpuTier = await getGPUTier({
     benchmarksURL: `${import.meta.env.BASE_URL}benchmarks`,
   });
-  const hq = gpuTier.tier > 2;
+  const hq = gpuTier.tier > 3;
   chessScene = new ChessScene({ canvas, hq, onReady: () => isReady.value = true })
 }
 
