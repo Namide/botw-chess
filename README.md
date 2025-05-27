@@ -9,15 +9,16 @@ View the [brief](./doc/brief.pdf)
 
 ## Credits
 
-|  |  |  |
-| --- | --- | --- |
-| Designer | [Alan](https://super8studio.eu/) |  |
-| Developer | [Damien](https://damien-doussaud.com/) |  |
-| Chess engines | Stockfish |
-| Render engine | Three.js |
-| Materials | polycount |
-| Inspiration | Louis Berger |
-| Fonts | Alexandre Créquer & Paul D. Hunt |
+|  |  |  |  |
+| --- | --- | --- | --- |
+|  | Designer | [Alan](https://super8studio.eu/) |  |
+|  | Developer | [Damien](https://damien-doussaud.com/) |  |
+|  | Chess engines | Stockfish |  |
+|  | Render engine | Three.js |  |
+|  | Materials | polycount |  |
+|  | Inspiration | Louis Berger |  |
+|  | Fonts | Alexandre Créquer & Paul D. Hunt |  |
+|  |  |  |  |
 
 ## Tools
 
