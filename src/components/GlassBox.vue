@@ -77,6 +77,7 @@ button {
   position: relative;
   margin-top: 2rem;
   background: #00000070;
+  color: #ffffff;
   border: 0;
   padding: 1rem 2rem;
   border-radius: 8px;

@@ -143,6 +143,10 @@ article {
   transform: rotate3d(1, 1, 0, 15deg);
 }
 
+button {
+  color: #ffffff;
+}
+
 button:disabled {
   opacity: 0.25;
   pointer-events: none;

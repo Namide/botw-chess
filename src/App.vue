@@ -103,6 +103,7 @@ header {
   margin-top: 4em;
 
   button {
+    color: #ffffff;
     opacity: 0.9;
   }
 }
@@ -127,6 +128,7 @@ footer {
 button {
   background-color: transparent;
   border: none;
+  color: #ffffff;
   opacity: 0.6;
   transition: opacity 0.3s linear;
 }
