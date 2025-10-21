@@ -4,15 +4,19 @@ import HomeView from './components/HomeView.vue';
 import ThreeD from './components/ThreeD.vue';
 import NewsView from './components/NewsView.vue';
 import JoinView from './components/JoinView.vue';
-import { START_CAMERA, START_POSITIONS } from './conf';
+import { CREDIT_CAMERA, CREDIT_POSITIONS, START_CAMERA, START_POSITIONS } from './conf';
 import { ChessScene } from './components/threeD/ChessScene';
 import CreditsView from './components/CreditsView.vue';
+import { konami } from './pure/konami';
 
 const position = ref<string | undefined>(undefined)
 const random = ref(1)
 const camera = ref('')
 
 const page = ref<'home' | 'news' | 'join' | 'credits'>('home')
+konami(() => {
+
+})
 
 watch(page, page => {
   switch (page) {
@@ -21,22 +25,8 @@ watch(page, page => {
       ChessScene.instance.moveCamera(START_CAMERA)
       break
     case 'credits':
-      ChessScene.instance.reset('8/3rk2p/3pb1p1/1Np1pp2/2P1P3/5P2/3bBKPP/R7 w - - 7 29')
-      ChessScene.instance.moveCamera({
-        "cameraPosition": {
-          "x": 7.4584726009576725,
-          "y": 4.61995805253401,
-          "z": 12.92355841605686
-        },
-        "targetPosition": {
-          "x": 0.3597959182553215,
-          "y": 2.6903860351731463,
-          "z": -2.3103919183359625
-        },
-        "focus": 17,
-        "aperture": 0.002,
-        "maxblur": 0.01
-      })
+      ChessScene.instance.reset(CREDIT_POSITIONS)
+      ChessScene.instance.moveCamera(CREDIT_CAMERA)
       break
     case 'join':
       break
